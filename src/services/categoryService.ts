@@ -21,7 +21,7 @@ export const findByIdAndDelete = async (
   return Category.findByIdAndDelete(id);
 };
 
-export const save = async (data: Category): Promise<Category> => {
+export const create = async (data: Category): Promise<Category> => {
   const category = new Category(data);
   return category.save();
 };

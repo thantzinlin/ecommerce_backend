@@ -61,3 +61,12 @@ export const findByIdAndDelete = async (
     res.status(500).json({ message: "Error deleting Category" });
   }
 };
+
+export const create = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const user = await categoryService.create(req.body);
+    res.status(201).json(user);
+  } catch (error) {
+    res.status(400).json({ message: "Error creating user" });
+  }
+};
