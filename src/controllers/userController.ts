@@ -1,12 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import * as userService from "../services/userService";
+import { sendResponse } from "../utils/responses";
+import { ResponseMessages, StatusCodes } from "../utils/constants";
 
-export const getUsers = async (req: Request, res: Response): Promise<void> => {
+export const getUsers = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const users = await userService.getAllUsers();
-    res.status(200).json(users);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    const data = await userService.getAllUsers(skip, limit);
+    sendResponse(res, data);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching users" });
+    next(error);
   }
 };
 
@@ -16,11 +25,11 @@ export const getUser = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const user = await userService.getUserById(req.params.id);
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
+    const data = await userService.getUserById(req.params.id);
+    if (!data) {
+      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
-      res.status(200).json(user);
+      sendResponse(res, data);
     }
   } catch (error) {
     return next(error);
@@ -29,32 +38,34 @@ export const getUser = async (
 
 export const updateUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
-    const user = await userService.updateUser(req.params.id, req.body);
-    if (!user) {
-      res.status(404).json({ message: "User not found" });
+    const data = await userService.updateUser(req.params.id, req.body);
+    if (!data) {
+      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
-      res.status(200).json(user);
+      sendResponse(res);
     }
   } catch (error) {
-    res.status(400).json({ message: "Error updating user" });
+    next(error);
   }
 };
 
 export const deleteUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
     const user = await userService.deleteUser(req.params.id);
     if (!user) {
-      res.status(404).json({ message: "User not found" });
+      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
-      res.status(200).json({ message: "User deleted" });
+      sendResponse(res);
     }
   } catch (error) {
-    res.status(500).json({ message: "Error deleting user" });
+    next(error);
   }
 };

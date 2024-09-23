@@ -13,7 +13,7 @@ export const getALL = async (
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     const data = await categoryService.getAll(skip, limit);
-    sendResponse(res, StatusCodes.OK, data);
+    sendResponse(res, data);
   } catch (error) {
     return next(error);
   }
@@ -27,9 +27,9 @@ export const getById = async (
   try {
     const data = await categoryService.getById(req.params.id);
     if (!data) {
-      sendResponse(res, StatusCodes.NOT_FOUND, {}, ResponseMessages.NOT_FOUND);
+      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
-      sendResponse(res, StatusCodes.OK, data);
+      sendResponse(res, data);
     }
   } catch (error) {
     return next(error);
@@ -47,9 +47,9 @@ export const findByIdAndUpdate = async (
       req.body
     );
     if (!data) {
-      sendResponse(res, StatusCodes.NOT_FOUND, {}, ResponseMessages.NOT_FOUND);
+      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
-      sendResponse(res, StatusCodes.OK);
+      sendResponse(res);
     }
   } catch (error) {
     return next(error);
@@ -64,9 +64,9 @@ export const findByIdAndDelete = async (
   try {
     const data = await categoryService.findByIdAndDelete(req.params.id);
     if (!data) {
-      sendResponse(res, StatusCodes.NOT_FOUND, {}, ResponseMessages.NOT_FOUND);
+      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
-      sendResponse(res, StatusCodes.OK);
+      sendResponse(res);
     }
   } catch (error) {
     return next(error);
@@ -80,7 +80,7 @@ export const create = async (
 ): Promise<void> => {
   try {
     const category = await categoryService.create(req.body);
-    sendResponse(res, StatusCodes.CREATED, category);
+    sendResponse(res, category, StatusCodes.CREATED);
   } catch (error) {
     return next(error);
   }

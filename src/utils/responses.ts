@@ -3,9 +3,9 @@ import { ResponseMessages, StatusCodes } from "./constants";
 
 export const sendResponse = (
   res: Response,
-  statusCode: number = StatusCodes.OK,
   data?: any,
-  message = ""
+  statusCode: number = StatusCodes.OK,
+  message = ResponseMessages.SUCCESS
 ): void => {
   const isSuccess = statusCode >= 200 && statusCode < 300;
   const responseMessage =

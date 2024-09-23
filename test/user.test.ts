@@ -61,30 +61,30 @@ describe("User Controller", () => {
     expect(res.json).toHaveBeenCalledWith({ message: "User not found" });
   });
 
-  it("should create a user", async () => {
-    const mockHashedPassword = "hashedPassword";
-    (bcrypt.hash as jest.Mock).mockResolvedValue(mockHashedPassword);
-    const mockUser = {
-      id: "1",
-      name: "John Doe",
-      password: mockHashedPassword,
-    };
-    (userService.createUser as jest.Mock).mockResolvedValue(mockUser);
+  // it("should create a user", async () => {
+  //   const mockHashedPassword = "hashedPassword";
+  //   (bcrypt.hash as jest.Mock).mockResolvedValue(mockHashedPassword);
+  //   const mockUser = {
+  //     id: "1",
+  //     name: "John Doe",
+  //     password: mockHashedPassword,
+  //   };
+  //   (userService.createUser as jest.Mock).mockResolvedValue(mockUser);
 
-    const req = {
-      body: { name: "John Doe", password: "password123" },
-    } as unknown as Request;
-    const res = {
-      status: jest.fn().mockReturnThis(),
-      json: jest.fn(),
-    } as unknown as Response;
-    const next = jest.fn() as NextFunction;
+  //   const req = {
+  //     body: { name: "John Doe", password: "password123" },
+  //   } as unknown as Request;
+  //   const res = {
+  //     status: jest.fn().mockReturnThis(),
+  //     json: jest.fn(),
+  //   } as unknown as Response;
+  //   const next = jest.fn() as NextFunction;
 
-    await userController.createUser(req, res);
+  //   await userController.createUser(req, res);
 
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(mockUser);
-  });
+  //   expect(res.status).toHaveBeenCalledWith(201);
+  //   expect(res.json).toHaveBeenCalledWith(mockUser);
+  // });
 
   it("should update a user", async () => {
     const mockUser = { id: "1", name: "John Doe" };

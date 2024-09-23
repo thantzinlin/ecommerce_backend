@@ -1,7 +1,10 @@
 import { User } from "../models/userModel";
 
-export const getAllUsers = async (): Promise<User[]> => {
-  return User.find();
+export const getAllUsers = async (
+  skip: number,
+  limit: number
+): Promise<User[]> => {
+  return await User.find().skip(skip).limit(limit).exec();
 };
 
 export const getUserById = async (id: string): Promise<User | null> => {
