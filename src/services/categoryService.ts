@@ -1,7 +1,10 @@
 import { Category } from "../models/category";
 
-export const getAll = async (): Promise<Category[]> => {
-  return Category.find();
+export const getAll = async (
+  skip: number,
+  limit: number
+): Promise<Category[]> => {
+  return await Category.find().skip(skip).limit(limit).exec();
 };
 
 export const getById = async (id: string): Promise<Category | null> => {

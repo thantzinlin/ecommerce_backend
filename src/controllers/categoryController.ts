@@ -1,12 +1,21 @@
 import { NextFunction, Request, Response } from "express";
 import * as categoryService from "../services/categoryService";
+import { sendResponse } from "../utils/responses";
+import { ResponseMessages, StatusCodes } from "../utils/constants";
 
-export const getALL = async (req: Request, res: Response): Promise<void> => {
+export const getALL = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const categories = await categoryService.getAll();
-    res.status(200).json(categories);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const skip = (page - 1) * limit;
+    const data = await categoryService.getAll(skip, limit);
+    sendResponse(res, StatusCodes.OK, data);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching categories" });
+    return next(error);
   }
 };
 
@@ -16,11 +25,11 @@ export const getById = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const user = await categoryService.getById(req.params.id);
-    if (!user) {
-      res.status(404).json({ message: "Data not found" });
+    const data = await categoryService.getById(req.params.id);
+    if (!data) {
+      sendResponse(res, StatusCodes.NOT_FOUND, {}, ResponseMessages.NOT_FOUND);
     } else {
-      res.status(200).json(user);
+      sendResponse(res, StatusCodes.OK, data);
     }
   } catch (error) {
     return next(error);
@@ -29,44 +38,50 @@ export const getById = async (
 
 export const findByIdAndUpdate = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
-    const category = await categoryService.findByIdAndUpdate(
+    const data = await categoryService.findByIdAndUpdate(
       req.params.id,
       req.body
     );
-    if (!category) {
-      res.status(404).json({ message: "Data not found" });
+    if (!data) {
+      sendResponse(res, StatusCodes.NOT_FOUND, {}, ResponseMessages.NOT_FOUND);
     } else {
-      res.status(200).json(category);
+      sendResponse(res, StatusCodes.OK);
     }
   } catch (error) {
-    res.status(400).json({ message: "Error updating Category" });
+    return next(error);
   }
 };
 
 export const findByIdAndDelete = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ): Promise<void> => {
   try {
-    const category = await categoryService.findByIdAndDelete(req.params.id);
-    if (!category) {
-      res.status(404).json({ message: "Data not found" });
+    const data = await categoryService.findByIdAndDelete(req.params.id);
+    if (!data) {
+      sendResponse(res, StatusCodes.NOT_FOUND, {}, ResponseMessages.NOT_FOUND);
     } else {
-      res.status(200).json({ message: "Category deleted" });
+      sendResponse(res, StatusCodes.OK);
     }
   } catch (error) {
-    res.status(500).json({ message: "Error deleting Category" });
+    return next(error);
   }
 };
 
-export const create = async (req: Request, res: Response): Promise<void> => {
+export const create = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
   try {
-    const user = await categoryService.create(req.body);
-    res.status(201).json(user);
+    const category = await categoryService.create(req.body);
+    sendResponse(res, StatusCodes.CREATED, category);
   } catch (error) {
-    res.status(400).json({ message: "Error creating user" });
+    return next(error);
   }
 };
