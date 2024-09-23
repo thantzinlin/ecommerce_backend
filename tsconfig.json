@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ESNext", // Latest JavaScript features
+    "module": "CommonJS", // Node.js module system
+    "strict": true, // Enforce all strict type checks
+    "esModuleInterop": true, // Better CommonJS/ES module compatibility
+    "forceConsistentCasingInFileNames": true, // Enforce consistent file name casing
+    "noImplicitAny": true, // Disallow the `any` type
+    "skipLibCheck": true, // Speed up compilation by skipping type checks on declaration files
+    "preserveConstEnums": true, // Keep `const enum` in output for debugging
+    "outDir": "./dist", // Output compiled files to `dist`
+    "rootDir": "./src", // Specify root directory for input files
+    "sourceMap": true, // Enable source maps for easier debugging
+    "removeComments": true, // Remove comments in the compiled output
+    "resolveJsonModule": true, // Allow importing JSON files
+    "declaration": true, // Generate `.d.ts` declaration files for libraries
+    "moduleResolution": "node", // Resolve modules as Node.js does
+    "allowSyntheticDefaultImports": true // Allow default imports from modules without default export
+  },
+  "include": ["src/**/*"], // Include all TypeScript files in `src` folder
+  "exclude": [
+    "node_modules", // Exclude node_modules
+    "**/*.spec.ts", // Exclude test files
+    "dist" // Exclude output directory
+  ]
+}
