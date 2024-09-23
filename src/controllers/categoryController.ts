@@ -10,10 +10,24 @@ export const getALL = async (
 ): Promise<void> => {
   try {
     const page = parseInt(req.query.page as string) || 1;
-    const limit = parseInt(req.query.limit as string) || 10;
-    const skip = (page - 1) * limit;
-    const data = await categoryService.getAll(skip, limit);
-    sendResponse(res, data);
+    const perPage = parseInt(req.query.perPage as string) || 10;
+    const search = (req.query.search as string) || "";
+    const skip = (page - 1) * perPage;
+
+    const { data, total, pageCounts } = await categoryService.getAll(
+      skip,
+      perPage,
+      search
+    );
+
+    sendResponse(
+      res,
+      data,
+      StatusCodes.OK,
+      ResponseMessages.SUCCESS,
+      total,
+      pageCounts
+    );
   } catch (error) {
     return next(error);
   }

@@ -13,7 +13,7 @@ function errorMiddleware(
   // const returncode = error.status || 500;
   // const returnmessage = error.message || "Something went wrong";
   const returncode = error.status || StatusCodes.INTERNAL_SERVER_ERROR;
-  const returnmessage = ResponseMessages.SERVER_ERROR;
+  const returnmessage = error.message || ResponseMessages.SERVER_ERROR;
   res.status(returncode).send({
     returncode,
     returnmessage,

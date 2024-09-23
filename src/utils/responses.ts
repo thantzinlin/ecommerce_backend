@@ -5,7 +5,9 @@ export const sendResponse = (
   res: Response,
   data?: any,
   statusCode: number = StatusCodes.OK,
-  message = ResponseMessages.SUCCESS
+  message = ResponseMessages.SUCCESS,
+  total?: number,
+  pageCounts?: number
 ): void => {
   const isSuccess = statusCode >= 200 && statusCode < 300;
   const responseMessage =
@@ -16,5 +18,7 @@ export const sendResponse = (
     returncode: isSuccess ? `${StatusCodes.OK}` : `${statusCode}`,
     returnmessage: responseMessage,
     data,
+    total,
+    pageCounts,
   });
 };

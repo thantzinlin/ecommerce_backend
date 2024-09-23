@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import * as authService from "../services/authService";
 import bcrypt from "bcrypt";
+import { sendResponse } from "../utils/responses";
 
 export const login = async (
   req: Request,
@@ -12,7 +13,12 @@ export const login = async (
 
     const token = await authService.login(username, password);
 
-    res.status(200).json({ token });
+    const data: any = {};
+    data.token = token;
+    res
+      .status(200)
+      .json({ returncode: "200", returnmessage: "Success", token });
+    //sendResponse(res, data);
   } catch (error: any) {
     return next(error);
   }
@@ -20,7 +26,8 @@ export const login = async (
 
 export const createUser = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: Function
 ): Promise<void> => {
   try {
     const hashedPassword = await bcrypt.hash(req.body.password, 10);
@@ -30,8 +37,8 @@ export const createUser = async (
     };
 
     const user = await authService.createUser(userData);
-    res.status(201).json(user);
+    sendResponse(res);
   } catch (error) {
-    res.status(400).json({ message: "Error creating user" });
+    next(error);
   }
 };

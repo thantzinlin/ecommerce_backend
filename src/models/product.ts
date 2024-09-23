@@ -8,7 +8,6 @@ const productSchema = new mongoose.Schema(
     category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
     stock: Number,
     isDeleted: { type: Boolean, default: false },
-
     reviews: [
       {
         userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },

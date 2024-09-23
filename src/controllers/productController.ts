@@ -2,17 +2,17 @@ import { NextFunction, Request, Response } from "express";
 import * as userService from "../services/userService";
 import bcrypt from "bcrypt";
 
-export const getProducts = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
-  try {
-    const users = await userService.getAllUsers();
-    res.status(200).json(users);
-  } catch (error) {
-    res.status(500).json({ message: "Error fetching users" });
-  }
-};
+// export const getProducts = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     const users = await userService.getAllUsers();
+//     res.status(200).json(users);
+//   } catch (error) {
+//     res.status(500).json({ message: "Error fetching users" });
+//   }
+// };
 
 export const getProduct = async (
   req: Request,
