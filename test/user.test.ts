@@ -22,7 +22,7 @@ describe("User Controller", () => {
     } as unknown as Response;
     const next = jest.fn() as NextFunction;
 
-    await userController.getUsers(req, res);
+    await userController.getUsers(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(mockUsers);
@@ -100,7 +100,7 @@ describe("User Controller", () => {
     } as unknown as Response;
     const next = jest.fn() as NextFunction;
 
-    await userController.updateUser(req, res);
+    await userController.updateUser(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(mockUser);
@@ -117,7 +117,7 @@ describe("User Controller", () => {
     } as unknown as Response;
     const next = jest.fn() as NextFunction;
 
-    await userController.deleteUser(req, res);
+    await userController.deleteUser(req, res, next);
 
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({ message: "User deleted" });
