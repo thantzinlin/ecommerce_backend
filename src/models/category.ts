@@ -14,12 +14,4 @@ const CategorySchema: Schema = new Schema(
   { timestamps: true }
 );
 
-CategorySchema.pre("find", function () {
-  this.where({ isDeleted: false });
-});
-
-CategorySchema.pre("findOne", function () {
-  this.where({ isDeleted: false });
-});
-
 export const Category = mongoose.model<Category>("Category", CategorySchema);

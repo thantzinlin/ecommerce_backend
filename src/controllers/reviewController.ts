@@ -1,8 +1,7 @@
 import { NextFunction, Request, Response } from "express";
-import * as productService from "../services/productService";
+import * as reviewService from "../services/reviewService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
-import cloudinary from "../config/cloudinaryConfig";
 
 export const getALL = async (
   req: Request,
@@ -15,7 +14,7 @@ export const getALL = async (
     const search = (req.query.search as string) || "";
     const skip = (page - 1) * perPage;
 
-    const { data, total, pageCounts } = await productService.getAll(
+    const { data, total, pageCounts } = await reviewService.getAll(
       skip,
       perPage,
       search
@@ -40,7 +39,7 @@ export const getById = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await productService.getById(req.params.id);
+    const data = await reviewService.getById(req.params.id);
     if (!data) {
       sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
@@ -57,10 +56,7 @@ export const findByIdAndUpdate = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await productService.findByIdAndUpdate(
-      req.params.id,
-      req.body
-    );
+    const data = await reviewService.findByIdAndUpdate(req.params.id, req.body);
     if (!data) {
       sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
@@ -77,7 +73,7 @@ export const findByIdAndDelete = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await productService.findByIdAndDelete(req.params.id);
+    const data = await reviewService.findByIdAndDelete(req.params.id);
     if (!data) {
       sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
     } else {
@@ -94,18 +90,8 @@ export const create = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    if (!req.file) {
-      throw new Error("File is required");
-    }
-
-    const result = await cloudinary.uploader.upload(req.file.path);
-
-    const productData = {
-      ...req.body,
-      imageUrl: result.secure_url,
-    };
-    const product = await productService.create(productData);
-    sendResponse(res, product, StatusCodes.CREATED);
+    const data = await reviewService.create(req.body);
+    sendResponse(res, data, StatusCodes.CREATED);
   } catch (error) {
     return next(error);
   }

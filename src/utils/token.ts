@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { User } from "../models/userModel";
+import { User } from "../models/user";
 import { Token } from "./tokenInterface";
 
 export const createToken = (user: User): string => {

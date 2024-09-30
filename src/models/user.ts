@@ -4,6 +4,7 @@ export interface User extends Document {
   username: string;
   email: string;
   password: string;
+  phone: string;
   role: string;
 }
 
@@ -12,6 +13,7 @@ const userSchema: Schema = new Schema(
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    phone: { type: String, required: true },
     role: { type: String },
     isDeleted: { type: Boolean, default: false },
   },

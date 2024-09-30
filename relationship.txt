@@ -1,0 +1,117 @@
+Users
+Products
+Categories
+Orders
+Cart
+Reviews
+
+
+--Users---
+{
+  "_id": ObjectId("..."),
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "hashed_password",
+  "addresses": [
+    {
+      "street": "123 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "10001",
+      "country": "USA"
+    }
+  ],
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+
+
+----products----
+{
+  "_id": ObjectId("..."),
+  "name": "Product 1",
+  "description": "Product description here...",
+  "price": 49.99,
+  "category_id": ObjectId("..."),
+  "stock_quantity": 100,
+  "images": [
+    "image1.jpg",
+    "image2.jpg"
+  ],
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+ 
+
+ ---categories---
+ {
+  "_id": ObjectId("..."),
+  "name": "Electronics",
+  "description": "Category description here..."
+}
+
+----Orders----
+{
+  "_id": ObjectId("..."),
+  "user_id": ObjectId("..."),
+  "products": [
+    {
+      "product_id": ObjectId("..."),
+      "quantity": 2,
+      "price": 49.99
+    },
+    {
+      "product_id": ObjectId("..."),
+      "quantity": 1,
+      "price": 19.99
+    }
+  ],
+  "total_price": 119.97,
+  "status": "Pending",
+  "order_date": ISODate("2023-09-26T10:00:00Z"),
+  "shipping_address": {
+    "street": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zipCode": "10001",
+    "country": "USA"
+  },
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+
+---Cart---
+{
+  "_id": ObjectId("..."),
+  "user_id": ObjectId("..."),
+  "products": [
+    {
+      "product_id": ObjectId("..."),
+      "quantity": 2
+    },
+    {
+      "product_id": ObjectId("...")
+    }
+  ],
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+
+---reviews---
+{
+  "_id": ObjectId("..."),
+  "user_id": ObjectId("..."),
+  "product_id": ObjectId("..."),
+  "rating": 4,
+  "comment": "Great product!",
+  "created_at": ISODate("2023-09-26T10:00:00Z")
+}
+
+
+---Relationships---
+User → Orders: A user_id reference in the Orders collection.
+User → Cart: A user_id reference or embedded cart within the User document.
+User → Reviews: A user_id reference in the Reviews collection.
+Product → Orders: Each order contains product references with quantities and prices.
+Product → Reviews: A product_id reference in the Reviews collection.
+Product → Categories: A category_id reference in the Products collection

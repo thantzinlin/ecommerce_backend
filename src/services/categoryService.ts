@@ -1,20 +1,5 @@
 import { Category } from "../models/category";
 
-// export const getAll = async (
-//   skip: number,
-//   limit: number,
-//   search: string = ""
-// ): Promise<Category[]> => {
-//   const query: any = {};
-//   if (search) {
-//     query.$or = [
-//       { name: { $regex: search, $options: "i" } },
-//       { description: { $regex: search, $options: "i" } },
-//     ];
-//   }
-//   return await Category.find(query).skip(skip).limit(limit).exec();
-// };
-
 export const getAll = async (
   skip: number,
   limit: number,
@@ -24,8 +9,7 @@ export const getAll = async (
   total: number;
   pageCounts: number;
 }> => {
-  const query: any = {};
-
+  const query: any = { isDeleted: false };
   if (search) {
     query.$or = [
       { name: { $regex: search, $options: "i" } },
