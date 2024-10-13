@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  ecommerce:
+    image: mitbfsdocker/ecommerce
+    restart: always
+    ports:
+      - "5000:5000"
+    environment:
+      - TZ=Asia/Yangon
+      - MONGO_URI=mongodb://admin:ba16666c5b74ea3e@172.188.98.25:27017/ecommerce?authSource=admin
+      - PORT=5000
+      - JWT_SECRET=jdwiejrdcsjwoe
+      - CLOUDINARY_CLOUD_NAME=dsdemersd
+      - CLOUDINARY_API_KEY=369324816138359
+      - CLOUDINARY_API_SECRET=nsgnQKzvuuCGrwsocwxyQS5YXnw
+    volumes:
+      - ./logs:/app/logs
