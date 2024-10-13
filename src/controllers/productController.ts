@@ -3,6 +3,7 @@ import * as productService from "../services/productService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 import cloudinary from "../config/cloudinaryConfig";
+import logger from "../utils/logger";
 
 export const getALL = async (
   req: Request,
@@ -94,15 +95,23 @@ export const create = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    if (!req.file) {
-      throw new Error("File is required");
-    }
+    // if (!req.file) {
+    //   throw new Error("File is required");
+    // }
 
-    const result = await cloudinary.uploader.upload(req.file.path);
+    //const result = await cloudinary.uploader.upload(req.file.path);
+
+    // const b64 = Buffer.from(req.file.buffer).toString("base64");
+    // let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+    // logger.info(`base64 image : ${dataURI}`, "");
+
+    const result = await cloudinary.uploader.upload(req.body.image);
+
+    console.log("image url from cloudinary" + result.secure_url);
 
     const productData = {
       ...req.body,
-      imageUrl: result.secure_url,
+      images: result.secure_url,
     };
     const product = await productService.create(productData);
     sendResponse(res, product, StatusCodes.CREATED);
@@ -110,3 +119,36 @@ export const create = async (
     return next(error);
   }
 };
+
+// export const create = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ): Promise<void> => {
+//   try {
+//     if (!req.file) {
+//       throw new Error("File is required");
+//     }
+
+//     cloudinary.uploader
+//       .upload_stream({ folder: "ecommerce/products" }, (error, result) => {
+//         if (error || !result) {
+//           throw new Error("Image upload failed");
+//         }
+
+//         const productData = {
+//           ...req.body,
+//           imageUrl: result.secure_url,
+//         };
+
+//         // Create product in database
+//         productService
+//           .create(productData)
+//           .then((product) => sendResponse(res, product, StatusCodes.CREATED))
+//           .catch(next);
+//       })
+//       .end(req.file.buffer); // Send file buffer to Cloudinary
+//   } catch (error) {
+//     next(error);
+//   }
+// };
