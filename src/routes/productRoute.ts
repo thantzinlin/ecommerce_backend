@@ -7,7 +7,7 @@ const router = Router();
 
 router.get("/", isAuth, productController.getALL);
 router.get("/:id", isAuth, productController.getById);
-router.post("/", isAuth, upload.single("image"), productController.create);
+router.post("/", isAuth, productController.create);
 //router.post("/", isAuth, upload.single('image'), productController.create);
 
 router.put("/:id", isAuth, productController.findByIdAndUpdate);

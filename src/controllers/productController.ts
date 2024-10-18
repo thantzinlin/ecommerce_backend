@@ -105,50 +105,29 @@ export const create = async (
     // let dataURI = "data:" + req.file.mimetype + ";base64," + b64;
     // logger.info(`base64 image : ${dataURI}`, "");
 
-    const result = await cloudinary.uploader.upload(req.body.image);
+    const { images } = req.body;
 
-    console.log("image url from cloudinary" + result.secure_url);
+    if (!Array.isArray(images) || images.length === 0) {
+      throw new Error("At least one image is required");
+    }
+
+    const uploadPromises = images.map((base64Image: string) =>
+      cloudinary.uploader.upload(base64Image)
+    );
+
+    const results = await Promise.all(uploadPromises);
+    const imageUrls = results.map((result) => result.secure_url);
+    console.log("Uploaded images:", imageUrls);
 
     const productData = {
       ...req.body,
-      images: result.secure_url,
+      images: imageUrls, // Store all image URLs in the product data
     };
+
     const product = await productService.create(productData);
     sendResponse(res, product, StatusCodes.CREATED);
   } catch (error) {
-    return next(error);
+    console.error("Image upload error:", error);
+    next(error);
   }
 };
-
-// export const create = async (
-//   req: Request,
-//   res: Response,
-//   next: NextFunction
-// ): Promise<void> => {
-//   try {
-//     if (!req.file) {
-//       throw new Error("File is required");
-//     }
-
-//     cloudinary.uploader
-//       .upload_stream({ folder: "ecommerce/products" }, (error, result) => {
-//         if (error || !result) {
-//           throw new Error("Image upload failed");
-//         }
-
-//         const productData = {
-//           ...req.body,
-//           imageUrl: result.secure_url,
-//         };
-
-//         // Create product in database
-//         productService
-//           .create(productData)
-//           .then((product) => sendResponse(res, product, StatusCodes.CREATED))
-//           .catch(next);
-//       })
-//       .end(req.file.buffer); // Send file buffer to Cloudinary
-//   } catch (error) {
-//     next(error);
-//   }
-// };
