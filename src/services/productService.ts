@@ -5,33 +5,6 @@ export const getAll = async (
   limit: number,
   search: string = ""
 ): Promise<{
-  data: Product[];
-  total: number;
-  pageCounts: number;
-}> => {
-  const query: any = { isDeleted: false };
-  if (search) {
-    query.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } },
-    ];
-  }
-  const total = await Product.countDocuments(query);
-  const pageCounts = Math.ceil(total / limit);
-  const data = await Product.find(query).skip(skip).limit(limit).exec();
-
-  return {
-    data,
-    total,
-    pageCounts,
-  };
-};
-
-export const getAll1 = async (
-  skip: number,
-  limit: number,
-  search: string = ""
-): Promise<{
   data: any[];
   total: number;
   pageCounts: number;
