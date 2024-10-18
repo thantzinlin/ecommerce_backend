@@ -41,10 +41,14 @@ export const getAll = async (
     {
       $project: {
         name: 1,
+        images: 1,
+        stockQuantity: 1,
         description: 1,
         price: 1,
         categoryId: 1,
         categoryName: "$category.name",
+        createdAt: 1,
+        updatedAt: 1,
       },
     },
   ]).exec();
