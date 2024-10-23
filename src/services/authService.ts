@@ -1,12 +1,12 @@
-import { User } from "../models/user";
+import { Users } from "../models/user";
 import bcrypt from "bcrypt";
 import token from "../utils/token";
 
 export const login = async (
-  username: string,
+  email: string,
   password: string
 ): Promise<string> => {
-  const user = await User.findOne({ username });
+  const user = await Users.findOne({ email });
   if (!user) {
     throw new Error("User not found");
   }
@@ -21,7 +21,7 @@ export const login = async (
   return authtoken;
 };
 
-export const createUser = async (userData: User): Promise<User> => {
-  const user = new User(userData);
+export const createUser = async (userData: Users): Promise<Users> => {
+  const user = new Users(userData);
   return user.save();
 };

@@ -26,25 +26,29 @@ export const getAll = async (
     { $limit: limit },
     {
       $lookup: {
-        from: "products",
-        localField: "productId",
+        from: "users",
+        localField: "userId",
         foreignField: "_id",
-        as: "product",
+        as: "user",
       },
     },
     {
       $unwind: {
-        path: "$product",
+        path: "$user",
         preserveNullAndEmptyArrays: true,
       },
     },
     {
       $project: {
-        name: 1,
-        description: 1,
-        price: 1,
-        categoryId: 1,
-        categoryName: "$product.name",
+        _id: 1,
+        username: "$user.username",
+        orderNumber: 1,
+        orderStatus: 1,
+        totalPrice: 1,
+        paymentMethod: 1,
+        status: 1,
+        orderDate: 1,
+        shippingAddress: 1,
       },
     },
   ]).exec();
@@ -57,7 +61,27 @@ export const getAll = async (
 };
 
 export const getById = async (id: string): Promise<Order | null> => {
-  return Order.findById(id);
+  const order: any = await Order.findById(id)
+    .populate({
+      path: "products.productId",
+      select: "name images",
+    })
+    .lean() // Converts Mongoose document to a plain JS object
+    .exec();
+
+  if (!order) return null;
+
+  // Flatten product details
+  order.products = order.products.map((product: any) => ({
+    productName: product.productId.name,
+    imageurl: product.productId.images[0],
+    quantity: product.quantity,
+    price: product.price,
+    discount: product.discount,
+    subtotal: product.subtotal,
+  }));
+
+  return order;
 };
 
 export const findByIdAndUpdate = async (

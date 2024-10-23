@@ -9,9 +9,9 @@ export const login = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
 
-    const token = await authService.login(username, password);
+    const token = await authService.login(email, password);
 
     const data: any = {};
     data.token = token;

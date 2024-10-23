@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import jwt from "jsonwebtoken";
-import { User } from "../models/user";
+import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+import { Users } from "../models/user";
 import { Token } from "../utils/tokenInterface";
 import token from "../utils/token";
 import HttpException from "../utils/httpException";
@@ -26,7 +26,7 @@ async function isAuth(
       return next(new HttpException(401, "Unauthorised"));
     }
 
-    const user = await User.findById(payload.id).select("-password").exec();
+    const user = await Users.findById(payload.id).select("-password").exec();
 
     if (!user) {
       return next(new HttpException(401, "Unauthorised"));
@@ -36,7 +36,17 @@ async function isAuth(
 
     return next();
   } catch (error) {
-    return next(new HttpException(401, "Unauthorised"));
+    if (error instanceof TokenExpiredError) {
+      return next(new HttpException(401, "Token expired"));
+    }
+
+    if (error instanceof JsonWebTokenError) {
+      return next(new HttpException(401, "Invalid token"));
+    }
+
+    return next(new HttpException(500, "Internal server error"));
+
+    // return next(new HttpException(401, "Unauthorised"));
   }
 }
 
