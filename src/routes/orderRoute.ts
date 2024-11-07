@@ -6,7 +6,8 @@ const router = Router();
 
 router.get("/", isAuth, orderController.getALL);
 router.get("/:id", isAuth, orderController.getById);
-router.post("/", isAuth, orderController.create);
+router.post("/", orderController.create);
+
 router.put("/:id", isAuth, orderController.findByIdAndUpdate);
 router.delete("/:id", isAuth, orderController.findByIdAndDelete);
 

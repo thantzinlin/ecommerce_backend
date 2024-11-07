@@ -1,7 +1,9 @@
 import { NextFunction, Request, Response } from "express";
 import * as orderService from "../services/orderService";
+import * as notiService from "../services/notiService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
+import { io } from "../server";
 
 export const getALL = async (
   req: Request,
@@ -90,8 +92,20 @@ export const create = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const category = await orderService.create(req.body);
-    sendResponse(res, category, StatusCodes.CREATED);
+    const order = await orderService.create(req.body);
+    let userId = "admin";
+    let message = "test";
+    const notificationData: any = {
+      userId: "admin", // You can adjust this as needed
+      message: `New order received: ${order.id}`, // Customize message with order details
+      isRead: false, // Default to unread
+    };
+
+    const notification = await notiService.create(notificationData);
+    // io.to("admin").emit("newOrder", notificationData);
+    io.emit("newOrder", notificationData);
+
+    sendResponse(res, order, StatusCodes.CREATED);
   } catch (error) {
     return next(error);
   }
