@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Product } from "../models/product";
 
 export const getAll = async (
@@ -39,6 +40,26 @@ export const getAll = async (
       },
     },
     {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "productId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        averageRating: {
+          $cond: {
+            if: { $gt: [{ $size: "$reviews" }, 0] },
+            then: { $avg: "$reviews.rating" },
+            else: 0,
+          },
+        },
+        totalReviews: { $size: "$reviews" },
+      },
+    },
+    {
       $project: {
         name: 1,
         images: 1,
@@ -47,6 +68,9 @@ export const getAll = async (
         price: 1,
         categoryId: 1,
         categoryName: "$category.name",
+        reviews: 1,
+        averageRating: 1,
+        totalReviews: 1,
         createdAt: 1,
         updatedAt: 1,
       },
@@ -58,6 +82,67 @@ export const getAll = async (
     total,
     pageCounts,
   };
+};
+
+// export const getByIdWithReview = async (
+//   id: string
+// ): Promise<Product | null> => {
+//   const productWithReviews = await Product.aggregate([
+//     // { $match: { _id: new mongoose.Types.ObjectId(id) } },
+//     {
+//       $lookup: {
+//         from: "reviews",
+//         localField: "_id",
+//         foreignField: "productId",
+//         as: "reviews",
+//       },
+//     },
+//   ]);
+
+//   return productWithReviews[0] || null;
+// };
+export const getByIdWithReview = async (
+  id: string
+): Promise<Product | null> => {
+  const productWithReviews = await Product.aggregate([
+    {
+      $match: { _id: new mongoose.Types.ObjectId(id), isDeleted: false },
+    },
+    {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "productId",
+        as: "reviews",
+      },
+    },
+    {
+      $addFields: {
+        averageRating: {
+          $cond: {
+            if: { $gt: [{ $size: "$reviews" }, 0] },
+            then: { $avg: "$reviews.rating" },
+            else: 0,
+          },
+        },
+        totalReviews: { $size: "$reviews" },
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        images: 1,
+        stockQuantity: 1,
+        description: 1,
+        price: 1,
+        reviews: 1,
+        averageRating: 1,
+        totalReviews: 1,
+      },
+    },
+  ]).exec();
+
+  return productWithReviews[0] || null;
 };
 
 export const getById = async (id: string): Promise<Product | null> => {

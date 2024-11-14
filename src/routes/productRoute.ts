@@ -5,8 +5,11 @@ import upload from "../middleware/multerConfig";
 
 const router = Router();
 
-router.get("/", isAuth, productController.getALL);
+router.get("/", productController.getALL);
 router.get("/:id", isAuth, productController.getById);
+
+router.get("/details/:id", productController.getByIdWithReview);
+
 router.post("/", isAuth, productController.create);
 //router.post("/", isAuth, upload.single('image'), productController.create);
 

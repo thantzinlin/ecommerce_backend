@@ -5,6 +5,9 @@ export interface Product extends Document {
   description?: string;
   price: number;
   categoryId: mongoose.Types.ObjectId;
+  // reviews: mongoose.Types.ObjectId[];
+  //reviews: [{ type: mongoose.Schema.Types.ObjectId; ref: "Review" }];
+
   stockQuantity: number;
   images?: string[];
 }
@@ -19,6 +22,8 @@ const ProductSchema: Schema = new Schema(
       ref: "Category",
       required: true,
     },
+    //reviews: [{ type: Schema.Types.ObjectId, ref: "Review" }],
+
     stockQuantity: { type: Number, required: true },
     images: [String],
     isDeleted: { type: Boolean, default: false },

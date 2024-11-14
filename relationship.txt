@@ -115,3 +115,212 @@ User → Reviews: A user_id reference in the Reviews collection.
 Product → Orders: Each order contains product references with quantities and prices.
 Product → Reviews: A product_id reference in the Reviews collection.
 Product → Categories: A category_id reference in the Products collection
+
+
+
+
+
+
+
+
+
+--------------------------------------------------------------------------------
+                                            v2
+------------------------------------------------------------------------------------
+
+
+Here's a consolidated documentation for the eCommerce schema design, covering each collection and detailing relationships, fields, and explanations for each aspect.
+
+eCommerce Database Schema Documentation
+Collections Overview
+Users: Stores user information, including addresses, payment methods, and wishlist.
+Categories: Defines categories for products, including nested categories.
+Products: Stores product information with support for multiple variants (e.g., size, color).
+Orders: Stores order details, including products ordered, shipping address, and payment information.
+Cart: Stores the user’s cart with product variants and quantities.
+Reviews: Stores user reviews for products.
+Schema Definitions
+1. Users Collection
+Stores information about registered users, including addresses, payment methods, and wishlist items.
+
+javascript
+Copy code
+{
+  "_id": ObjectId("..."),
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "hashed_password",  // Securely stored password
+  "phone": "+1234567890",
+  "addresses": [  // Multiple user addresses
+    {
+      "label": "Home",
+      "street": "123 Main St",
+      "city": "New York",
+      "state": "NY",
+      "zipCode": "10001",
+      "country": "USA",
+      "isDefault": true
+    }
+  ],
+  "paymentMethods": [  // User's payment methods
+    {
+      "type": "credit_card",
+      "cardNumber": "**** **** **** 1234",
+      "expiry": "12/25"
+    }
+  ],
+  "wishlist": [ObjectId("...")],  // References to favorite Products
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+Key Fields
+addresses: Stores multiple addresses, marked with a default.
+paymentMethods: Array of payment methods (e.g., credit card).
+wishlist: List of product IDs in the user's wishlist.
+2. Categories Collection
+Defines categories and their hierarchy for product organization.
+
+javascript
+Copy code
+{
+  "_id": ObjectId("..."),
+  "name": "Electronics",
+  "slug": "electronics",
+  "description": "Category description here...",
+  "parentCategory": ObjectId("..."),  // Optional, for nested categories
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+Key Fields
+parentCategory: Allows nested categories by referencing other categories.
+3. Products Collection with Variants
+Stores product information, supporting variants for attributes like size, color, and individual SKU details.
+
+javascript
+Copy code
+{
+  "_id": ObjectId("..."),
+  "name": "T-Shirt",
+  "description": "Comfortable cotton T-shirt",
+  "category_id": ObjectId("..."),  // Category reference
+  "brand": "Brand Name",
+  "base_price": 20.00,
+  "images": ["image1.jpg", "image2.jpg"],
+  "variants": [  // Array of variants with SKU, size, color, etc.
+    {
+      "sku": "TSHIRT-RED-S",
+      "size": "S",
+      "color": "Red",
+      "price": 21.00,
+      "stock_quantity": 50
+    }
+  ],
+  "attributes": [  // Additional product attributes
+    { "key": "material", "value": "cotton" },
+    { "key": "gender", "value": "unisex" }
+  ],
+  "ratings": {  // Aggregate rating data
+    "average": 4.5,
+    "count": 230
+  },
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+Key Fields
+variants: Stores individual product variations (e.g., different sizes or colors) with specific SKU, price, and stock.
+attributes: Stores additional product characteristics.
+ratings: Aggregates user ratings for the product.
+4. Orders Collection
+Stores details of each order, including user information, purchased items, payment status, and delivery information.
+
+javascript
+Copy code
+{
+  "_id": ObjectId("..."),
+  "user_id": ObjectId("..."),  // User reference
+  "products": [  // List of products in the order
+    {
+      "product_id": ObjectId("..."),  // Product reference
+      "variant_sku": "TSHIRT-RED-S",  // SKU for specific variant
+      "quantity": 2,
+      "price": 21.00,                 // Price at purchase time
+      "subtotal": 42.00
+    }
+  ],
+  "total_price": 42.00,
+  "status": "Pending",                // Order status
+  "shipping_address": {               // Shipping details
+    "label": "Home",
+    "street": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zipCode": "10001",
+    "country": "USA"
+  },
+  "payment_method": {                 // Payment method used
+    "type": "credit_card",
+    "last4": "1234",
+    "payment_status": "Paid"
+  },
+  "order_date": ISODate("2023-09-26T10:00:00Z"),
+  "delivery_date": ISODate("2023-09-30T10:00:00Z"),
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+Key Fields
+products: List of products purchased, with variant SKU and quantity.
+shipping_address: Embedded address information for delivery.
+payment_method: Includes payment type and status.
+5. Cart Collection
+Stores the user's cart, including products added and their quantities.
+
+javascript
+Copy code
+{
+  "_id": ObjectId("..."),
+  "user_id": ObjectId("..."),  // User reference
+  "products": [                // Products in the cart
+    {
+      "product_id": ObjectId("..."),
+      "variant_sku": "TSHIRT-BLUE-M",  // SKU for specific variant
+      "quantity": 1
+    }
+  ],
+  "total_price": 21.50,
+  "created_at": ISODate("2023-09-26T10:00:00Z"),
+  "updated_at": ISODate("2023-09-26T12:00:00Z")
+}
+Key Fields
+products: List of items in the cart, each with product variant SKU and quantity.
+6. Reviews Collection
+Stores user-submitted reviews for products.
+
+javascript
+Copy code
+{
+  "_id": ObjectId("..."),
+  "user_id": ObjectId("..."),    // User reference
+  "product_id": ObjectId("..."), // Product reference
+  "rating": 4,                   // Rating out of 5
+  "comment": "Great quality product!",
+  "created_at": ISODate("2023-09-26T10:00:00Z")
+}
+Key Fields
+rating: User’s rating for the product.
+comment: Text comment about the product.
+Relationships Overview
+User ↔ Orders: One-to-many relationship; each user can have multiple orders.
+User ↔ Cart: One-to-one relationship; each user has one active cart.
+User ↔ Reviews: One-to-many relationship; each user can review multiple products.
+Product ↔ Variants: Each product can have multiple variants (size, color).
+Product ↔ Categories: Products are associated with categories for organization.
+Order ↔ Payment Methods: Each order has a payment method stored with basic information for reference.
+Usage Summary
+This schema design is optimized for real-world scalability, supporting complex product variants, user and order relationships, and detailed product categorization and review systems. It leverages MongoDB’s flexibility for embedded documents and arrays to reduce the need for frequent joins, enhancing performance and usability in an eCommerce application.
+
+
+
+
+
+
+

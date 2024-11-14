@@ -52,6 +52,23 @@ export const getById = async (
   }
 };
 
+export const getByIdWithReview = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const data = await productService.getByIdWithReview(req.params.id);
+    if (!data) {
+      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+    } else {
+      sendResponse(res, data);
+    }
+  } catch (error) {
+    return next(error);
+  }
+};
+
 export const findByIdAndUpdate = async (
   req: Request,
   res: Response,

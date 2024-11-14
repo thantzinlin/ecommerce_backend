@@ -32,6 +32,9 @@ async function isAuth(
       return next(new HttpException(401, "Unauthorised"));
     }
 
+    // (req as any).user = user;
+    req.body.userId = user._id;
+
     //req.user = user;
 
     return next();

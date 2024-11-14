@@ -1,9 +1,9 @@
 import { Router } from "express";
-import * as notiController from "../controllers/notiController";
+import * as cartController from "../controllers/cartController";
 import isAuth from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.get("/count", isAuth, notiController.getUnreadCount);
+router.post("/", isAuth, cartController.create);
 
 export default router;

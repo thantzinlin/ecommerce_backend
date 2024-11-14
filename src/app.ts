@@ -10,6 +10,7 @@ import logger from "./utils/logger";
 import orderRoute from "./routes/orderRoute";
 import reviewRoute from "./routes/reviewRoute";
 import notiRoute from "./routes/notiRoute";
+import cartRoute from "./routes/cartRoute";
 
 const app: Application = express();
 
@@ -28,7 +29,8 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoute);
 app.use("/api/reviews", reviewRoute);
-app.use("/api/noti", notiRoute);
+app.use("/api/notifications", notiRoute);
+app.use("/api/cart", cartRoute);
 
 app.use(errorMiddleware);
 
