@@ -30,8 +30,24 @@ export const createBooking = async (req: Request, res: Response) => {
         classId,
         seatsBooked: seatsRequested,
       });
-      await newBooking.save();
 
+      try {
+        await newBooking.save();
+
+        return res.status(201).json({ message: "Booking successful" });
+      } catch (dbError) {
+        console.error("Booking save failed:", dbError);
+        await redis.watch(`class:${classId}:availableSeats`);
+        const rollbackTransaction = redis.multi();
+        rollbackTransaction.set(
+          `class:${classId}:availableSeats`,
+          availableSeats.toString()
+        );
+        await rollbackTransaction.exec();
+        return res
+          .status(500)
+          .json({ message: "Booking save failed, transaction reverted." });
+      }
       return res.status(201).json({ message: "Booking successful" });
     } else {
       return res
