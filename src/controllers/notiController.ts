@@ -11,7 +11,7 @@ export const getUnreadCount = async (
   try {
     const data = await notiService.getUnreadCount();
 
-    sendResponse(res, data);
+    return sendResponse(res, data);
   } catch (error) {
     return next(error);
   }

@@ -22,7 +22,7 @@ export const getALL = async (
       search
     );
 
-    sendResponse(
+    return sendResponse(
       res,
       data,
       StatusCodes.OK,
@@ -43,9 +43,14 @@ export const getById = async (
   try {
     const data = await productService.getById(req.params.id);
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res, data);
+      return sendResponse(res, data);
     }
   } catch (error) {
     return next(error);
@@ -60,9 +65,14 @@ export const getByIdWithReview = async (
   try {
     const data = await productService.getByIdWithReview(req.params.id);
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res, data);
+      return sendResponse(res, data);
     }
   } catch (error) {
     return next(error);
@@ -80,9 +90,14 @@ export const findByIdAndUpdate = async (
       req.body
     );
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res);
+      return sendResponse(res);
     }
   } catch (error) {
     return next(error);
@@ -97,9 +112,14 @@ export const findByIdAndDelete = async (
   try {
     const data = await productService.findByIdAndDelete(req.params.id);
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res);
+      return sendResponse(res);
     }
   } catch (error) {
     return next(error);
@@ -142,7 +162,7 @@ export const create = async (
     };
 
     const product = await productService.create(productData);
-    sendResponse(res, product, StatusCodes.CREATED);
+    return sendResponse(res, product, StatusCodes.CREATED);
   } catch (error) {
     console.error("Image upload error:", error);
     next(error);

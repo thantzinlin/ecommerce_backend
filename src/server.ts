@@ -4,16 +4,14 @@ import { config } from "./config";
 import http from "http";
 import { Server } from "socket.io";
 import { setupSocket } from "./services/socket";
-// import { testRedisConnection } from "./services/redisService";
 
 const server = http.createServer(app);
 
-// testRedisConnection();
 export const io = new Server(server, {
   cors: {
     origin: ["http://localhost:3000", "http://localhost:4200"],
     methods: ["GET", "POST"],
-    credentials: false, // Allow credentials if needed
+    credentials: false,
   },
 });
 const startServer = async () => {

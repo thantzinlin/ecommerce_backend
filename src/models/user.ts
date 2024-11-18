@@ -7,6 +7,8 @@ export interface Users extends Document {
   phone: string;
   address: String;
   role: string;
+  resetPasswordToken?: string;
+  resetPasswordExpires?: Date;
 }
 
 const userSchema: Schema = new Schema(
@@ -18,6 +20,8 @@ const userSchema: Schema = new Schema(
     address: { type: String, required: true },
     role: { type: String },
     isDeleted: { type: Boolean, default: false },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
   },
   { timestamps: true }
 );

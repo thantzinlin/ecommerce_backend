@@ -7,4 +7,6 @@ router.post("/login", authController.login);
 router.get("/logout", authController.logout);
 
 router.post("/register", authController.createUser);
+router.post("/forgotpassword", authController.forgotPassword);
+
 export default router;

@@ -11,6 +11,7 @@ import orderRoute from "./routes/orderRoute";
 import reviewRoute from "./routes/reviewRoute";
 import notiRoute from "./routes/notiRoute";
 import cartRoute from "./routes/cartRoute";
+import { setupSwagger } from "./config/swagger";
 
 const app: Application = express();
 
@@ -20,6 +21,7 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 });
 
 app.use(cors());
+//setupSwagger(app);
 
 app.use(express.json({ limit: "50mb" }));
 

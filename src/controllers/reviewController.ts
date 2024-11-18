@@ -41,9 +41,14 @@ export const getById = async (
   try {
     const data = await reviewService.getById(req.params.id);
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res, data);
+      return sendResponse(res, data);
     }
   } catch (error) {
     return next(error);
@@ -58,9 +63,14 @@ export const findByIdAndUpdate = async (
   try {
     const data = await reviewService.findByIdAndUpdate(req.params.id, req.body);
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res);
+      return sendResponse(res);
     }
   } catch (error) {
     return next(error);
@@ -75,9 +85,14 @@ export const findByIdAndDelete = async (
   try {
     const data = await reviewService.findByIdAndDelete(req.params.id);
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res);
+      return sendResponse(res);
     }
   } catch (error) {
     return next(error);
@@ -91,7 +106,7 @@ export const create = async (
 ): Promise<void> => {
   try {
     const data = await reviewService.create(req.body);
-    sendResponse(res, data, StatusCodes.CREATED);
+    return sendResponse(res, data, StatusCodes.CREATED);
   } catch (error) {
     return next(error);
   }

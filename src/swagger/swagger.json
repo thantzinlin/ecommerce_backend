@@ -1,0 +1,131 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Ecommerce API",
+    "description": "API documentation for Ecommerce app.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5000"
+    }
+  ],
+  "paths": {
+    "/hello": {
+      "get": {
+        "summary": "Get a hello message",
+        "responses": {
+          "200": {
+            "description": "A hello message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Hello, world!"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "summary": "Login to the application",
+        "description": "User logs in with their email and password.",
+        "requestBody": {
+          "description": "User credentials for login",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "example": "admin@gmail.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "example": "User@123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful login. Returns a JWT token and success message.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "returncode": {
+                      "type": "string",
+                      "example": "200"
+                    },
+                    "returnmessage": {
+                      "type": "string",
+                      "example": "Success"
+                    },
+                    "token": {
+                      "type": "string",
+                      "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY3MmMzZDFjZmE5ZDUwMWJmZTVhOTlmNSIsImlhdCI6MTczMTU3NzcyNywiZXhwIjoxNzMxNjY0MTI3fQ.fEZYPnkopnzjn1147dhmwk3ctyy0DJ4rQ8dra-Lp47k"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid credentials or bad request.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "returncode": {
+                      "type": "string",
+                      "example": "400"
+                    },
+                    "returnmessage": {
+                      "type": "string",
+                      "example": "Invalid email or password."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "returncode": {
+                      "type": "string",
+                      "example": "500"
+                    },
+                    "returnmessage": {
+                      "type": "string",
+                      "example": "Something went wrong. Please try again later."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

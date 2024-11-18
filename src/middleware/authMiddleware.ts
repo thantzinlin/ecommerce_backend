@@ -4,6 +4,7 @@ import { Users } from "../models/user";
 import { Token } from "../utils/tokenInterface";
 import token from "../utils/token";
 import HttpException from "../utils/httpException";
+import { Socket } from "socket.io";
 
 async function isAuth(
   req: Request,
@@ -54,3 +55,38 @@ async function isAuth(
 }
 
 export default isAuth;
+
+export const isAuthSocket = async (
+  socket: Socket,
+  next: (err?: Error) => void
+) => {
+  try {
+    const token = socket.handshake.auth.token; // Token from client during connection
+
+    if (!token) {
+      return next(new Error("Unauthorized: No token provided"));
+    }
+    const payload = await token.verifyToken(token);
+
+    if (payload instanceof jwt.JsonWebTokenError) {
+      return next(new Error("Unauthorized: Invalid token"));
+    }
+    const user = await Users.findById(payload.id).select("-password").exec();
+
+    if (!user) {
+      return next(new Error("Unauthorized: User not found"));
+    }
+
+    // Attach user data to the socket for later use
+    socket.data.user = user;
+    next(); // Proceed to the next middleware or event handler
+  } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      return next(new Error("Unauthorized: Token expired"));
+    }
+    if (error instanceof JsonWebTokenError) {
+      return next(new Error("Unauthorized: Invalid token"));
+    }
+    next(new Error("Internal server error"));
+  }
+};

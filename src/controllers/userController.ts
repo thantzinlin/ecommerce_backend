@@ -13,9 +13,9 @@ export const getUsers = async (
     const limit = parseInt(req.query.limit as string) || 10;
     const skip = (page - 1) * limit;
     const data = await userService.getAllUsers(skip, limit);
-    sendResponse(res, data);
+    return sendResponse(res, data);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -27,9 +27,14 @@ export const getUser = async (
   try {
     const data = await userService.getUserById(req.params.id);
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res, data);
+      return sendResponse(res, data);
     }
   } catch (error) {
     return next(error);
@@ -44,12 +49,17 @@ export const updateUser = async (
   try {
     const data = await userService.updateUser(req.params.id, req.body);
     if (!data) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res);
+      return sendResponse(res);
     }
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 
@@ -61,11 +71,16 @@ export const deleteUser = async (
   try {
     const user = await userService.deleteUser(req.params.id);
     if (!user) {
-      sendResponse(res, {}, StatusCodes.NOT_FOUND, ResponseMessages.NOT_FOUND);
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
     } else {
-      sendResponse(res);
+      return sendResponse(res);
     }
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
