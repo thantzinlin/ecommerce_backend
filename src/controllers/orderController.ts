@@ -4,6 +4,7 @@ import * as notiService from "../services/notiService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 import { io } from "../server";
+import Counter from "../models/Counter";
 
 export const getALL = async (
   req: Request,
@@ -107,21 +108,40 @@ export const create = async (
   next: NextFunction
 ): Promise<void> => {
   try {
+    const orderNumber = await generateOrderNumber();
+    req.body.orderNumber = orderNumber;
+
     const order = await orderService.create(req.body);
-    let userId = "admin";
-    let message = "test";
-    const notificationData: any = {
-      userId: "admin", // You can adjust this as needed
-      message: `New order received: ${order.id}`, // Customize message with order details
-      isRead: false, // Default to unread
+    const notiData: any = {
+      userId: req.body.userId,
+      type: "order",
+      message: `New order received: ${orderNumber}`,
     };
 
-    const notification = await notiService.create(notificationData);
-    // io.to("admin").emit("newOrder", notificationData);
-    io.emit("newOrder", notificationData);
+    await notiService.create(notiData);
+
+    //io.emit("orderNotification", notiData);
+    io.to("adminRoom").emit("orderNotification", notiData);
 
     return sendResponse(res, order, StatusCodes.CREATED);
   } catch (error) {
     return next(error);
   }
+};
+
+const generateOrderNumber = async (): Promise<string> => {
+  const today = new Date().toISOString().split("T")[0].replace(/-/g, "");
+
+  let counter = await Counter.findOne({ date: today });
+
+  if (!counter) {
+    counter = new Counter({ date: today, sequence: 1 });
+    await counter.save();
+  } else {
+    counter.sequence += 1;
+    await counter.save();
+  }
+
+  const formattedSequence = counter.sequence.toString().padStart(6, "0");
+  return `ORD-${today}-${formattedSequence}`;
 };

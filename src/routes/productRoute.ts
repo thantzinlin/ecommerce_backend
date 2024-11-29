@@ -9,6 +9,7 @@ router.get("/", productController.getALL);
 router.get("/:id", isAuth, productController.getById);
 
 router.get("/details/:id", productController.getByIdWithReview);
+router.get("/categoryId/:id", productController.getByCategoryId);
 
 router.post("/", isAuth, productController.create);
 //router.post("/", isAuth, upload.single('image'), productController.create);

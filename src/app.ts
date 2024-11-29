@@ -14,16 +14,20 @@ import cartRoute from "./routes/cartRoute";
 import { setupSwagger } from "./config/swagger";
 
 const app: Application = express();
+app.use(express.json({ limit: "50mb" }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
-  logger.info(`${req.method} ${req.url}`); // Log HTTP method and URL
+  logger.info({
+    body: req.body,
+    method: req.method,
+    url: req.url,
+  });
+
   next();
 });
 
 app.use(cors());
 //setupSwagger(app);
-
-app.use(express.json({ limit: "50mb" }));
 
 app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
@@ -35,10 +39,5 @@ app.use("/api/notifications", notiRoute);
 app.use("/api/cart", cartRoute);
 
 app.use(errorMiddleware);
-
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-  logger.error(`Error: ${err.message}`, { stack: err.stack }); // Log error details
-  res.status(500).json({ message: "Internal server error" });
-});
 
 export default app;

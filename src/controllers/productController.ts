@@ -168,3 +168,25 @@ export const create = async (
     next(error);
   }
 };
+
+export const getByCategoryId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const data = await productService.getByCategoryId(req.params.id);
+    if (!data) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
+    } else {
+      return sendResponse(res, data);
+    }
+  } catch (error) {
+    return next(error);
+  }
+};

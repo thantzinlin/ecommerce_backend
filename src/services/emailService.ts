@@ -3,7 +3,7 @@ import { config } from "../config";
 
 export const sendEmail = async (
   to: string,
-  token: string = "Success",
+  resettoken: string = "Success",
   html?: string
 ) => {
   try {
@@ -21,7 +21,7 @@ export const sendEmail = async (
                 Please click the following link to reset your password:
               </p>
               <a 
-                href="${config.WEBSITE_URL}/reset-password/${token}" 
+                href="${config.WEBSITE_URL}/resetpassword/${resettoken}" 
                 style="background-color: #4CAF50; color: white; padding: 14px 25px; text-decoration: none; border-radius: 5px;">
                 Reset Your Password
               </a>
@@ -40,11 +40,11 @@ export const sendEmail = async (
       to,
       from: config.SENDER_EMAIL || "your-email@example.com",
       subject: "Password Reset Request",
-      text: `You are receiving this email because you (or someone else) have requested to reset your password.     
-      Please click the following link to reset your password:
-    ${config.WEBSITE_URL}/reset-password/${token}
-      
-      If you did not request this, please ignore this email.`,
+      //   text: `You are receiving this email because you (or someone else) have requested to reset your password.
+      //   Please click the following link to reset your password:
+      // ${config.WEBSITE_URL}/resetpassword/${token}
+
+      //  If you did not request this, please ignore this email.`,
       html: defaultHtml,
     };
 

@@ -8,5 +8,6 @@ router.get("/logout", authController.logout);
 
 router.post("/register", authController.createUser);
 router.post("/forgotpassword", authController.forgotPassword);
+router.post("/resetpassword", authController.resetPassword);
 
 export default router;

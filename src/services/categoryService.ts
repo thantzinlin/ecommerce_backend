@@ -9,7 +9,7 @@ export const getAll = async (
   total: number;
   pageCounts: number;
 }> => {
-  const query: any = { isDeleted: false };
+  const query: any = { isDeleted: false, parentCategory: null };
   if (search) {
     query.$or = [
       { name: { $regex: search, $options: "i" } },
@@ -18,7 +18,15 @@ export const getAll = async (
   }
   const total = await Category.countDocuments(query);
   const pageCounts = Math.ceil(total / limit);
-  const data = await Category.find(query).skip(skip).limit(limit).exec();
+  const data = await Category.find(query)
+    .skip(skip)
+    .limit(limit)
+    .populate({
+      path: "children",
+      populate: { path: "children" }, // Populate nested children
+    })
+    .lean()
+    .exec();
 
   return {
     data,

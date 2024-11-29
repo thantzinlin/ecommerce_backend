@@ -7,21 +7,17 @@ export interface Users extends Document {
   phone: string;
   address: String;
   role: string;
-  resetPasswordToken?: string;
-  resetPasswordExpires?: Date;
 }
 
 const userSchema: Schema = new Schema(
   {
     username: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: false, unique: true },
     password: { type: String, required: true },
-    phone: { type: String, required: true },
-    address: { type: String, required: true },
+    phone: { type: String, required: true, unique: true },
+    address: { type: String, required: false },
     role: { type: String },
     isDeleted: { type: Boolean, default: false },
-    resetPasswordToken: String,
-    resetPasswordExpires: Date,
   },
   { timestamps: true }
 );

@@ -8,10 +8,11 @@ export const setupSocket = (io: Server) => {
   io.on("connection", (socket) => {
     console.log("A user connected:", socket.id);
 
-    // socket.on("joinRoom", (userId) => {
-    //   socket.join(userId);
-    //   console.log(`User ${userId} joined room ${userId}`);
-    // });
+    socket.on("joinRoom", (roomName) => {
+      console.log(`Socket ${socket.id} joining room: ${roomName}`);
+      socket.join(roomName);
+      console.log(`Socket ${socket.id} joined rooms: `, socket.rooms); // Debug log
+    });
 
     // socket.on("addToCart", async (userId, product) => {
     //   console.log("add to cart emitted", socket.id);
@@ -31,13 +32,17 @@ export const setupSocket = (io: Server) => {
     //   io.to(userId).emit("updateCartCount", count);
     // });
 
-    socket.on("newOrder", async (orderData) => {
-      console.log("Received new order:", orderData);
+    // socket.on("newOrder", async (orderData) => {
+    //   try {
+    //     console.log("Received new order:", orderData);
 
-      const notification = await notiService.create(orderData);
+    //     const notification = await notiService.create(orderData);
 
-      io.emit("orderNotification", orderData);
-    });
+    //     io.emit("orderNotification", orderData);
+    //   } catch (error) {
+    //     console.error("Error handling new order:", error);
+    //   }
+    // });
 
     socket.on("disconnect", () => {
       console.log("User disconnected:", socket.id);

@@ -22,6 +22,7 @@ export const getAll = async (
 
   const data = await Order.aggregate([
     { $match: query },
+    { $sort: { orderDate: -1 } },
     { $skip: skip },
     { $limit: limit },
     {

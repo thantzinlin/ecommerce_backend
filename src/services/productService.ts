@@ -84,23 +84,6 @@ export const getAll = async (
   };
 };
 
-// export const getByIdWithReview = async (
-//   id: string
-// ): Promise<Product | null> => {
-//   const productWithReviews = await Product.aggregate([
-//     // { $match: { _id: new mongoose.Types.ObjectId(id) } },
-//     {
-//       $lookup: {
-//         from: "reviews",
-//         localField: "_id",
-//         foreignField: "productId",
-//         as: "reviews",
-//       },
-//     },
-//   ]);
-
-//   return productWithReviews[0] || null;
-// };
 export const getByIdWithReview = async (
   id: string
 ): Promise<Product | null> => {
@@ -147,6 +130,12 @@ export const getByIdWithReview = async (
 
 export const getById = async (id: string): Promise<Product | null> => {
   return Product.findById(id);
+};
+
+export const getByCategoryId = async (
+  categoryId: string
+): Promise<Product[]> => {
+  return Product.find({ categoryId }).exec();
 };
 
 export const findByIdAndUpdate = async (

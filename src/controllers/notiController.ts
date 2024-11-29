@@ -16,3 +16,25 @@ export const getUnreadCount = async (
     return next(error);
   }
 };
+
+export const getAllNotification = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const type = (req.query.type as string) || "order";
+
+    const { data, total } = await notiService.getAllNotification(type);
+
+    return sendResponse(
+      res,
+      data,
+      StatusCodes.OK,
+      ResponseMessages.SUCCESS,
+      total
+    );
+  } catch (error) {
+    return next(error);
+  }
+};

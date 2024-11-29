@@ -1,11 +1,13 @@
 import { NextFunction, Request, Response } from "express";
 import * as authService from "../services/authService";
 import { sendResponse } from "../utils/responses";
-import * as crypto from "crypto";
 import { sendEmail } from "../services/emailService";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
+
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import token from "../utils/token";
+import excludeKey from "../utils/utilFunctions";
 
 export const logout = async (
   req: Request,
@@ -36,16 +38,31 @@ export const login = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { email, password } = req.body;
+    const { email, phone, password } = req.body;
 
-    const token = await authService.login(email, password);
+    const user = await authService.findUserByPhone(phone);
+    if (!user) {
+      return sendResponse(res, {}, StatusCodes.NOT_FOUND, "User not found");
+    }
 
-    const data: any = {};
-    data.token = token;
-    res
-      .status(200)
-      .json({ returncode: "200", returnmessage: "Success", token });
-    //sendResponse(res, data);
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.UNAUTHORIZED,
+        "Invalid user or password"
+      );
+    }
+
+    const authtoken = token.createToken(user);
+    const userinfo = excludeKey(user, "password");
+    const data = {
+      ...userinfo,
+      token: authtoken,
+    };
+
+    sendResponse(res, data);
   } catch (error: any) {
     return next(error);
   }
@@ -88,11 +105,13 @@ export const forgotPassword = async (
       );
     }
 
-    const token = crypto.randomBytes(20).toString("hex");
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour expiration
-    await user.save();
-    await sendEmail(to, token, html);
+    const resettoken = jwt.sign(
+      { email: to },
+      process.env.JWT_SECRET || "jdwiejrdcsjwoe",
+      { expiresIn: "1h" }
+    );
+
+    await sendEmail(to, resettoken, html);
 
     return sendResponse(res);
   } catch (error) {
@@ -106,33 +125,42 @@ export const resetPassword = async (
   next: NextFunction
 ) => {
   try {
-    const { token, newPassword } = req.body;
-
-    // Verify the token
-    const decoded: any = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "your-secret"
-    );
-    const userId = decoded.userId;
-
-    // Find the user and update the password
-    const user = await authService.findUserByUserId(userId);
-    if (!user) {
-      return res.status(400).json({ message: "User not found" });
+    const { resettoken, newpassword } = req.body;
+    let decoded: any;
+    try {
+      decoded = jwt.verify(
+        resettoken,
+        process.env.JWT_SECRET || "jdwiejrdcsjwoe"
+      );
+    } catch (err) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.UNAUTHORIZED,
+        "Invalid or expired reset token"
+      );
     }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    // Use the decoded email to find the user
+    const email = decoded.email;
+    const user = await authService.findUserByEmail(email);
+    if (!user) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
+    }
 
-    // Update the password and clear the reset token and expiration
+    const hashedPassword = await bcrypt.hash(newpassword, 10);
+
     user.password = hashedPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpires = undefined;
 
     await user.save();
 
-    res.status(200).json({ message: "Password reset successfully" });
+    return sendResponse(res);
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
