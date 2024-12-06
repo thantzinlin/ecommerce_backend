@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import * as reviewService from "../services/reviewService";
+import * as townshipService from "../services/townshipService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 
@@ -14,13 +14,13 @@ export const getALL = async (
     const search = (req.query.search as string) || "";
     const skip = (page - 1) * perPage;
 
-    const { data, total, pageCounts } = await reviewService.getAll(
+    const { data, total, pageCounts } = await townshipService.getAll(
       skip,
       perPage,
       search
     );
 
-    sendResponse(
+    return sendResponse(
       res,
       data,
       StatusCodes.OK,
@@ -39,7 +39,29 @@ export const getById = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await reviewService.getById(req.params.id);
+    const data = await townshipService.getById(req.params.id);
+    if (!data) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
+    } else {
+      return sendResponse(res, data);
+    }
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getByCityId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const data = await townshipService.getByCityId(req.params.id);
     if (!data) {
       return sendResponse(
         res,
@@ -61,7 +83,10 @@ export const findByIdAndUpdate = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await reviewService.findByIdAndUpdate(req.params.id, req.body);
+    const data = await townshipService.findByIdAndUpdate(
+      req.params.id,
+      req.body
+    );
     if (!data) {
       return sendResponse(
         res,
@@ -83,7 +108,7 @@ export const findByIdAndDelete = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await reviewService.findByIdAndDelete(req.params.id);
+    const data = await townshipService.findByIdAndDelete(req.params.id);
     if (!data) {
       return sendResponse(
         res,
@@ -105,30 +130,8 @@ export const create = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await reviewService.create(req.body);
+    const data = await townshipService.create(req.body);
     return sendResponse(res, data, StatusCodes.CREATED);
-  } catch (error) {
-    return next(error);
-  }
-};
-
-export const getReviewsByUserId = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const data = await reviewService.getReviewsByUserId(req.body.userId);
-    if (!data) {
-      return sendResponse(
-        res,
-        {},
-        StatusCodes.NOT_FOUND,
-        ResponseMessages.NOT_FOUND
-      );
-    } else {
-      return sendResponse(res, data);
-    }
   } catch (error) {
     return next(error);
   }

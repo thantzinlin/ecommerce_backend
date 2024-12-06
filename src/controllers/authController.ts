@@ -15,7 +15,6 @@ export const logout = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    // Clear the JWT token stored in the HTTP-only cookie
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // Use 'true' in production

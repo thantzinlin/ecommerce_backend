@@ -46,3 +46,22 @@ export const create = async (data: Review): Promise<Review> => {
   const review = new Review(data);
   return review.save();
 };
+
+export const getReviewsByUserId = async (userId: string): Promise<any[]> => {
+  const reviews = await Review.find({ userId })
+    .select("comment rating productId")
+    .populate({
+      path: "productId",
+      select: "name images",
+    })
+    .exec();
+
+  if (!reviews || reviews.length === 0) return [];
+
+  return reviews.map((review: any) => ({
+    rating: review.rating,
+    comment: review.comment,
+    productName: review.productId?.name,
+    productImages: review.productId?.images[0] || [],
+  }));
+};

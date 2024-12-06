@@ -44,8 +44,8 @@ export const setupSocket = (io: Server) => {
     //   }
     // });
 
-    socket.on("disconnect", () => {
-      console.log("User disconnected:", socket.id);
-    });
+    // socket.on("disconnect", () => {
+    //   console.log("User disconnected:", socket.id);
+    // });
   });
 };

@@ -100,3 +100,56 @@ export const create = async (data: Order): Promise<Order> => {
   const order = new Order(data);
   return order.save();
 };
+
+export const getOrdersByUserId = async (userId: string): Promise<Order[]> => {
+  const orders = await Order.find({ userId })
+    .select("orderNumber products orderDate orderStatus totalPrice")
+    .populate({
+      path: "products.productId",
+      select: "name images",
+    })
+    .exec();
+
+  if (!orders) return [];
+
+  return orders.map((order: any) => ({
+    ...order.toObject(),
+    products: order.products.map((product: any) => ({
+      _id: product._id,
+      name: product.productId.name,
+      images: product.productId.images,
+      quantity: product.quantity,
+      price: product.price,
+      discount: product.discount,
+      subtotal: product.subtotal,
+    })),
+  }));
+};
+
+export const getOrdersByStatus = async (
+  userId: string,
+  orderStatus: string
+): Promise<Order[]> => {
+  const orders = await Order.find({ userId, orderStatus })
+    .select("orderNumber products orderDate orderStatus totalPrice")
+    .populate({
+      path: "products.productId",
+      select: "name images",
+    })
+    .exec();
+
+  if (!orders) return [];
+
+  return orders.map((order: any) => ({
+    ...order.toObject(),
+    products: order.products.map((product: any) => ({
+      _id: product._id,
+      name: product.productId.name,
+      image: product.productId.images[0],
+      quantity: product.quantity,
+      price: product.price,
+      discount: product.discount,
+      subtotal: product.subtotal,
+    })),
+  }));
+};

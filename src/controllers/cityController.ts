@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import * as reviewService from "../services/reviewService";
+import * as cityService from "../services/cityService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 
@@ -14,13 +14,13 @@ export const getALL = async (
     const search = (req.query.search as string) || "";
     const skip = (page - 1) * perPage;
 
-    const { data, total, pageCounts } = await reviewService.getAll(
+    const { data, total, pageCounts } = await cityService.getAll(
       skip,
       perPage,
       search
     );
 
-    sendResponse(
+    return sendResponse(
       res,
       data,
       StatusCodes.OK,
@@ -39,7 +39,7 @@ export const getById = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await reviewService.getById(req.params.id);
+    const data = await cityService.getById(req.params.id);
     if (!data) {
       return sendResponse(
         res,
@@ -61,7 +61,7 @@ export const findByIdAndUpdate = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await reviewService.findByIdAndUpdate(req.params.id, req.body);
+    const data = await cityService.findByIdAndUpdate(req.params.id, req.body);
     if (!data) {
       return sendResponse(
         res,
@@ -83,7 +83,7 @@ export const findByIdAndDelete = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await reviewService.findByIdAndDelete(req.params.id);
+    const data = await cityService.findByIdAndDelete(req.params.id);
     if (!data) {
       return sendResponse(
         res,
@@ -105,30 +105,8 @@ export const create = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await reviewService.create(req.body);
+    const data = await cityService.create(req.body);
     return sendResponse(res, data, StatusCodes.CREATED);
-  } catch (error) {
-    return next(error);
-  }
-};
-
-export const getReviewsByUserId = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const data = await reviewService.getReviewsByUserId(req.body.userId);
-    if (!data) {
-      return sendResponse(
-        res,
-        {},
-        StatusCodes.NOT_FOUND,
-        ResponseMessages.NOT_FOUND
-      );
-    } else {
-      return sendResponse(res, data);
-    }
   } catch (error) {
     return next(error);
   }

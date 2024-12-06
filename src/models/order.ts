@@ -19,7 +19,18 @@ export interface Order extends Document {
   paymentMethod: string;
   paymentStatus: string;
   orderDate: Date;
-  shippingAddress: string;
+  shippingAddress: {
+    city: string;
+    township: string;
+    street: string;
+    postalCode: number;
+  };
+  billingAddress: {
+    city: string;
+    township: string;
+    street: string;
+    postalCode: number;
+  };
   notes: string;
 }
 
@@ -49,7 +60,18 @@ const OrderSchema: Schema = new Schema(
     orderStatus: { type: String, default: "Pending", required: true },
     paymentMethod: { type: String, required: true },
     orderDate: { type: Date, default: Date.now },
-    shippingAddress: { type: String, required: true },
+    shippingAddress: {
+      city: { type: String, required: true },
+      township: { type: String, required: true },
+      street: { type: String, required: true },
+      postalCode: { type: Number, required: false },
+    },
+    billingAddress: {
+      city: { type: String, required: true },
+      township: { type: String, required: true },
+      street: { type: String, required: true },
+      postalCode: { type: Number, required: false },
+    },
     paymentStatus: { type: String, required: false },
     notes: { type: String, required: false },
     isDeleted: { type: Boolean, default: false },

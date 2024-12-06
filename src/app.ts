@@ -11,6 +11,8 @@ import orderRoute from "./routes/orderRoute";
 import reviewRoute from "./routes/reviewRoute";
 import notiRoute from "./routes/notiRoute";
 import cartRoute from "./routes/cartRoute";
+import cityRoute from "./routes/cityRoute";
+import townshipRoute from "./routes/townshipRoute";
 import { setupSwagger } from "./config/swagger";
 
 const app: Application = express();
@@ -37,6 +39,8 @@ app.use("/api/orders", orderRoute);
 app.use("/api/reviews", reviewRoute);
 app.use("/api/notifications", notiRoute);
 app.use("/api/cart", cartRoute);
+app.use("/api/cities", cityRoute);
+app.use("/api/townships", townshipRoute);
 
 app.use(errorMiddleware);
 

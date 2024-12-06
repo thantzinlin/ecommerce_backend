@@ -5,6 +5,8 @@ import isAuth from "../middleware/authMiddleware";
 const router = Router();
 
 router.get("/", isAuth, reviewController.getALL);
+router.get("/getByUserId", isAuth, reviewController.getReviewsByUserId);
+
 router.get("/:id", isAuth, reviewController.getById);
 router.post("/", isAuth, reviewController.create);
 router.put("/:id", isAuth, reviewController.findByIdAndUpdate);

@@ -4,7 +4,7 @@ import * as notiService from "../services/notiService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 import { io } from "../server";
-import Counter from "../models/Counter";
+import Counter from "../models/counter";
 
 export const getALL = async (
   req: Request,
@@ -144,4 +144,51 @@ const generateOrderNumber = async (): Promise<string> => {
 
   const formattedSequence = counter.sequence.toString().padStart(6, "0");
   return `ORD-${today}-${formattedSequence}`;
+};
+
+export const getOrdersByUserId = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const data = await orderService.getOrdersByUserId(req.body.userId);
+    if (!data) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
+    } else {
+      return sendResponse(res, data);
+    }
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getOrdersByStatus = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const data = await orderService.getOrdersByStatus(
+      req.body.userId,
+      "Cancelled"
+    );
+    if (!data) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
+    } else {
+      return sendResponse(res, data);
+    }
+  } catch (error) {
+    return next(error);
+  }
 };

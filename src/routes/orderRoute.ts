@@ -7,6 +7,9 @@ import isAuth from "../middleware/authMiddleware";
 const router = Router();
 
 router.get("/", isAuth, orderController.getALL);
+router.get("/getByUserId", isAuth, orderController.getOrdersByUserId);
+router.get("/cancel", isAuth, orderController.getOrdersByStatus);
+
 router.get("/:id", isAuth, orderController.getById);
 router.post("/", isAuth, orderController.create);
 
