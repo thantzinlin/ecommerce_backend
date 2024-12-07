@@ -56,7 +56,12 @@ export const updateUser = async (
         ResponseMessages.NOT_FOUND
       );
     } else {
-      return sendResponse(res);
+      return sendResponse(
+        res,
+        data,
+        StatusCodes.OK,
+        "User updated successfully"
+      );
     }
   } catch (error) {
     return next(error);
@@ -78,7 +83,7 @@ export const deleteUser = async (
         ResponseMessages.NOT_FOUND
       );
     } else {
-      return sendResponse(res);
+      return sendResponse(res, {}, StatusCodes.OK, "User deleted successfully");
     }
   } catch (error) {
     return next(error);

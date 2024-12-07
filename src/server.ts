@@ -9,7 +9,11 @@ const server = http.createServer(app);
 
 export const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:4200"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:4200",
+      "https://wonderful-ground-034220710.4.azurestaticapps.net",
+    ],
     methods: ["GET", "POST"],
     credentials: false,
   },
