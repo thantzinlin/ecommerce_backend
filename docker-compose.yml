@@ -2,17 +2,42 @@ version: "3.9"
 
 services:
   ecommerce:
-    image: mitbfsdocker/ecommerce
+    image: mitbfsdocker/ecommerce_backend
     restart: always
     ports:
       - "5000:5000"
     environment:
-      - TZ=Asia/Yangon
-      - MONGO_URI=mongodb://admin:ba16666c5b74ea3e@172.188.98.25:27017/ecommerce?authSource=admin
+      - MONGO_URI=mongodb://admin:ba16666c5b74ea3e@mongo:27017/ecommerce?authSource=admin # Updated MONGO_URI to use the MongoDB container
       - PORT=5000
       - JWT_SECRET=jdwiejrdcsjwoe
       - CLOUDINARY_CLOUD_NAME=dsdemersd
       - CLOUDINARY_API_KEY=369324816138359
       - CLOUDINARY_API_SECRET=nsgnQKzvuuCGrwsocwxyQS5YXnw
+      - REDIS_URI=redis://redis:6379
+      - SENDGRID_API_KEY=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
+      - SENDER_EMAIL=thantzinlin1995@gmail.com
+      - WEBSITE_URL=http://localhost:4200
     volumes:
       - ./logs:/app/logs
+
+  mongo:
+    image: mongo:latest
+    restart: always
+    container_name: mongo
+    ports:
+      - "27017:27017" # Exposing MongoDB on the host machine
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=ba16666c5b74ea3e
+      - MONGO_INITDB_DATABASE=ecommerce # Optional: You can specify the default DB
+    volumes:
+      - mongo_data:/data/db # Persists MongoDB data
+
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "6379:6379" # Exposing Redis on the host machine
+
+volumes:
+  mongo_data: # Named volume for MongoDB data persistence
