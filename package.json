@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --verbose",
+    "build": "tsc",
     "start": "node dist/server.js",
+    "test": "jest --verbose",
     "dev": "nodemon --exec ts-node src/server.ts"
   },
   "keywords": [],
