@@ -66,5 +66,4 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: "ecomm"
-          slot-name: "Production"
           package: .
