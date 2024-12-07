@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document } from "mongoose";
-interface Counter extends Document {
+export interface Counter extends Document {
   date: string;
   sequence: number;
 }
