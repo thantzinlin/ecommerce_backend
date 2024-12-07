@@ -4,7 +4,6 @@ import * as notiService from "../services/notiService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 import { io } from "../server";
-import Counter from "../models/counter";
 
 export const getALL = async (
   req: Request,
@@ -108,7 +107,7 @@ export const create = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const orderNumber = await generateOrderNumber();
+    const orderNumber = await orderService.generateOrderNumber();
     req.body.orderNumber = orderNumber;
 
     const order = await orderService.create(req.body);
@@ -127,23 +126,6 @@ export const create = async (
   } catch (error) {
     return next(error);
   }
-};
-
-const generateOrderNumber = async (): Promise<string> => {
-  const today = new Date().toISOString().split("T")[0].replace(/-/g, "");
-
-  let counter = await Counter.findOne({ date: today });
-
-  if (!counter) {
-    counter = new Counter({ date: today, sequence: 1 });
-    await counter.save();
-  } else {
-    counter.sequence += 1;
-    await counter.save();
-  }
-
-  const formattedSequence = counter.sequence.toString().padStart(6, "0");
-  return `ORD-${today}-${formattedSequence}`;
 };
 
 export const getOrdersByUserId = async (

@@ -1,3 +1,4 @@
+import Counter from "../models/counter";
 import { Order } from "../models/order";
 
 export const getAll = async (
@@ -152,4 +153,21 @@ export const getOrdersByStatus = async (
       subtotal: product.subtotal,
     })),
   }));
+};
+
+export const generateOrderNumber = async (): Promise<string> => {
+  const today = new Date().toISOString().split("T")[0].replace(/-/g, "");
+
+  let counter = await Counter.findOne({ date: today });
+
+  if (!counter) {
+    counter = new Counter({ date: today, sequence: 1 });
+    await counter.save();
+  } else {
+    counter.sequence += 1;
+    await counter.save();
+  }
+
+  const formattedSequence = counter.sequence.toString().padStart(6, "0");
+  return `ORD-${today}-${formattedSequence}`;
 };
