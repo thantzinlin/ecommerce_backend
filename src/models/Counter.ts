@@ -9,5 +9,4 @@ const CounterSchema = new Schema<ICounter>({
   sequence: { type: Number, default: 0 },
 });
 
-const Counter = mongoose.model<ICounter>("Counter", CounterSchema);
-export default Counter;
+export const Counter = mongoose.model<ICounter>("Counter", CounterSchema);
