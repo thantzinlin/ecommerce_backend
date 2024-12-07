@@ -1,4 +1,4 @@
-import Counter from "../models/counter";
+import { Counter } from "../models/counter";
 import { Order } from "../models/order";
 
 export const getAll = async (
