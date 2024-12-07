@@ -140,7 +140,6 @@ export const resetPassword = async (
       );
     }
 
-    // Use the decoded email to find the user
     const email = decoded.email;
     const user = await authService.findUserByEmail(email);
     if (!user) {
