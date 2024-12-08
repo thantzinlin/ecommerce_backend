@@ -27,8 +27,14 @@ app.use((req: Request, res: Response, next: NextFunction) => {
 
   next();
 });
+const corsOptions = {
+  origin: "https://wonderful-ground-034220710.4.azurestaticapps.net",
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
+//app.use(cors());
 //setupSwagger(app);
 
 app.use("/api/users", userRoutes);
