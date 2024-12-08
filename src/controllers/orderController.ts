@@ -107,14 +107,14 @@ export const create = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    //  const orderNumber = await orderService.generateOrderNumber();
-    req.body.orderNumber = "1";
+    const orderNumber = await orderService.generateOrderNumber();
+    req.body.orderNumber = orderNumber;
 
     const order = await orderService.create(req.body);
     const notiData: any = {
       userId: req.body.userId,
       type: "order",
-      message: `New order received: 1`,
+      message: `New order received: ${orderNumber}`,
     };
 
     await notiService.create(notiData);
