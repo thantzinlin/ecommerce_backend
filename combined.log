@@ -1,2 +1,0 @@
-{"body":{},"level":"info","message":"Incoming request","method":"GET","timestamp":"2024-12-08T15:24:46.994Z","url":"/api/categories?page=1&perPage=10&search="}
-{"duration":"139ms","level":"info","message":"Response sent","method":"GET","responseBody":"Success","statusCode":200,"timestamp":"2024-12-08T15:24:47.133Z","url":"/?page=1&perPage=10&search="}

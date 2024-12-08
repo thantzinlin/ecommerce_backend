@@ -9,8 +9,8 @@ const logger = createLogger({
   ),
   transports: [
     new transports.Console(), // Log to the console
-    new transports.File({ filename: "log/error.log", level: "error" }), // Log errors to file
-    new transports.File({ filename: "log/combined.log" }), // Log all logs to file
+    new transports.File({ filename: "logs/error.log", level: "error" }), // Log errors to file
+    new transports.File({ filename: "logs/combined.log" }), // Log all logs to file
   ],
 });
 
