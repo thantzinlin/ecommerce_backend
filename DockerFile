@@ -16,8 +16,11 @@ COPY . .
 # Build the TypeScript application
 RUN npm run build
 
-# Verify if the dist folder is created
-RUN ls -R dist
+# Debug: List all files and folders in the project to ensure everything is copied
+RUN ls -R
+
+# Debug: Verify if the dist folder is created
+RUN ls -R dist || echo "dist folder not found!"
 
 # Expose the port your application will run on
 EXPOSE 3000
