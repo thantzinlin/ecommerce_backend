@@ -1,29 +1,25 @@
-# Use the correct Node.js image
-FROM node:20-alpine
+#Build stage
+FROM node:20-alpine AS build
 
-# Set the working directory in the container
 WORKDIR /app
 
-# Copy package.json and package-lock.json first for better caching
-COPY package.json package-lock.json ./
+COPY package*.json .
 
-# Install dependencies (including devDependencies like TypeScript)
 RUN npm install
 
-# Copy all files into the container
 COPY . .
 
-# Build the TypeScript application
 RUN npm run build
 
-# Debug: List all files and folders in the project to ensure everything is copied
-RUN ls -R
+#Production stage
+FROM node:20-alpine AS production
 
-# Debug: Verify if the dist folder is created
-RUN ls -R dist || echo "dist folder not found!"
+WORKDIR /app
 
-# Expose the port your application will run on
-EXPOSE 3000
+COPY package*.json .
 
-# Start the application
-CMD ["npm", "start"]
+RUN npm ci --only=production
+
+COPY --from=build /app/dist ./dist
+
+CMD ["node", "dist/server.js"]
