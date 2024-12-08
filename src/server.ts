@@ -12,6 +12,7 @@ export const io = new Server(server, {
     origin: [
       "http://localhost:3000",
       "http://localhost:4200",
+      "https://orange-dune-065c3b710.4.azurestaticapps.net",
       "https://wonderful-ground-034220710.4.azurestaticapps.net",
     ],
     methods: ["GET", "POST"],

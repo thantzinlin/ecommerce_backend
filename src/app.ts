@@ -19,22 +19,36 @@ const app: Application = express();
 app.use(express.json({ limit: "50mb" }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
+  const start = Date.now();
   logger.info({
+    message: "Incoming request",
     body: req.body,
     method: req.method,
     url: req.url,
   });
 
+  res.on("finish", () => {
+    const duration = Date.now() - start;
+    logger.info({
+      message: "Response sent",
+      statusCode: res.statusCode,
+      method: req.method,
+      url: req.url,
+      duration: `${duration}ms`,
+      responseBody: res.statusCode >= 400 ? "Error response" : "Success",
+    });
+  });
+
   next();
 });
-const corsOptions = {
-  origin: "https://wonderful-ground-034220710.4.azurestaticapps.net",
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-};
+// const corsOptions = {
+//   origin: "https://wonderful-ground-034220710.4.azurestaticapps.net",
+//   methods: ["GET", "POST", "PUT", "DELETE"],
+//   allowedHeaders: ["Content-Type", "Authorization"],
+// };
 
-app.use(cors(corsOptions));
-//app.use(cors());
+// app.use(cors(corsOptions));
+app.use(cors());
 //setupSwagger(app);
 
 app.use("/api/users", userRoutes);
