@@ -1,0 +1,4 @@
+{"body":{},"level":"info","message":"Incoming request","method":"GET","timestamp":"2024-12-08T15:33:30.078Z","url":"/api/categories?page=1&perPage=10&search="}
+{"duration":"173ms","level":"info","message":"Response sent","method":"GET","responseBody":"Success","statusCode":200,"timestamp":"2024-12-08T15:33:30.250Z","url":"/?page=1&perPage=10&search="}
+{"body":{},"level":"info","message":"Incoming request","method":"GET","timestamp":"2024-12-08T16:14:20.284Z","url":"/api/categories?page=1&perPage=10&search="}
+{"duration":"488ms","level":"info","message":"Response sent","method":"GET","responseBody":"Success","statusCode":200,"timestamp":"2024-12-08T16:14:20.773Z","url":"/?page=1&perPage=10&search="}
