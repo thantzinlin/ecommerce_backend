@@ -2,9 +2,9 @@ import * as cartService from "../services/cartService";
 import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 import { NextFunction, Request, Response } from "express";
-import { Users } from "../models/user";
+import { IUsers, Users } from "../models/user";
 interface RequestWithUser extends Request {
-  user?: Users;
+  user?: IUsers;
 }
 export const addToCart = async (
   req: RequestWithUser,
