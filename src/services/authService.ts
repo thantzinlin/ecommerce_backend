@@ -1,22 +1,26 @@
-import { Users } from "../models/user";
+import { IUsers, Users } from "../models/user";
 import bcrypt from "bcrypt";
 import token from "../utils/token";
 
-export const createUser = async (userData: Users): Promise<Users> => {
+export const createUser = async (userData: IUsers): Promise<IUsers> => {
   const user = new Users(userData);
   return user.save();
 };
 
-export const findUserByEmail = async (email: string): Promise<Users | null> => {
+export const findUserByEmail = async (
+  email: string
+): Promise<IUsers | null> => {
   return await Users.findOne({ email }).lean();
 };
 
-export const findUserByPhone = async (phone: string): Promise<Users | null> => {
+export const findUserByPhone = async (
+  phone: string
+): Promise<IUsers | null> => {
   return await Users.findOne({ phone }).lean();
 };
 
 export const findUserByUserId = async (
   userId: string
-): Promise<Users | null> => {
+): Promise<IUsers | null> => {
   return await Users.findOne({ userId });
 };
