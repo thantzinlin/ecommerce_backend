@@ -12,12 +12,14 @@ export const getALL = async (
     const page = parseInt(req.query.page as string) || 1;
     const perPage = parseInt(req.query.perPage as string) || 10;
     const search = (req.query.search as string) || "";
+    const isAdmin = req.query.isAdmin === "true";
     const skip = (page - 1) * perPage;
 
     const { data, total, pageCounts } = await categoryService.getAll(
       skip,
       perPage,
-      search
+      search,
+      isAdmin
     );
 
     return sendResponse(

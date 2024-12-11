@@ -6,6 +6,9 @@ const router = Router();
 
 router.get("/", categoryController.getALL);
 router.get("/:id", categoryController.getById);
+
+router.get("/:id", categoryController.getById);
+
 router.post("/", isAuth, categoryController.create);
 router.put("/:id", isAuth, categoryController.findByIdAndUpdate);
 router.delete("/:id", isAuth, categoryController.findByIdAndDelete);

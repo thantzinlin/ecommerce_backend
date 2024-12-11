@@ -3,13 +3,18 @@ import { Category } from "../models/category";
 export const getAll = async (
   skip: number,
   limit: number,
-  search: string = ""
+  search: string = "",
+  isAdmin: boolean
 ): Promise<{
   data: Category[];
   total: number;
   pageCounts: number;
 }> => {
-  const query: any = { isDeleted: false, parentCategory: null };
+  const query: any = { isDeleted: false };
+
+  if (!isAdmin) {
+    query.parentCategory = null;
+  }
   if (search) {
     query.$or = [
       { name: { $regex: search, $options: "i" } },
