@@ -2,14 +2,17 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface Category extends Document {
   name: string;
+  description: string;
   slug: string;
   image?: string;
   parentCategory?: Types.ObjectId;
+  children?: Category[];
 }
 
 const CategorySchema: Schema = new Schema(
   {
     name: { type: String, required: true },
+    description: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
     image: { type: String },
     isDeleted: { type: Boolean, default: false },

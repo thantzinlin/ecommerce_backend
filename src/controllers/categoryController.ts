@@ -12,14 +12,42 @@ export const getALL = async (
     const page = parseInt(req.query.page as string) || 1;
     const perPage = parseInt(req.query.perPage as string) || 10;
     const search = (req.query.search as string) || "";
-    const isAdmin = req.query.isAdmin === "true";
     const skip = (page - 1) * perPage;
 
     const { data, total, pageCounts } = await categoryService.getAll(
       skip,
       perPage,
-      search,
-      isAdmin
+      search
+    );
+
+    return sendResponse(
+      res,
+      data,
+      StatusCodes.OK,
+      ResponseMessages.SUCCESS,
+      total,
+      pageCounts
+    );
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getALLForAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const perPage = parseInt(req.query.perPage as string) || 10;
+    const search = (req.query.search as string) || "";
+    const skip = (page - 1) * perPage;
+
+    const { data, total, pageCounts } = await categoryService.getAllForAdmin(
+      skip,
+      perPage,
+      search
     );
 
     return sendResponse(
@@ -42,6 +70,28 @@ export const getById = async (
 ): Promise<void> => {
   try {
     const data = await categoryService.getById(req.params.id);
+    if (!data) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.NOT_FOUND,
+        ResponseMessages.NOT_FOUND
+      );
+    } else {
+      return sendResponse(res, data);
+    }
+  } catch (error) {
+    return next(error);
+  }
+};
+
+export const getBySlug = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const data = await categoryService.getBySlug(req.params.slug);
     if (!data) {
       return sendResponse(
         res,
