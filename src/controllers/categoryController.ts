@@ -91,7 +91,9 @@ export const getBySlug = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const data = await categoryService.getBySlug(req.params.slug);
+    const slug = req.query.slug as string;
+
+    const data = await categoryService.getBySlug(slug);
     if (!data) {
       return sendResponse(
         res,

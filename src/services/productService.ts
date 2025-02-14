@@ -69,6 +69,7 @@ export const getAll = async (
         categoryId: 1,
         categoryName: "$category.name",
         reviews: 1,
+        variants: 1,
         averageRating: 1,
         totalReviews: 1,
         createdAt: 1,
@@ -151,7 +152,52 @@ export const findByIdAndDelete = async (
   return Product.findByIdAndDelete(id);
 };
 
-export const create = async (data: Product): Promise<Product> => {
+export const create = async (data: any): Promise<Product> => {
   const product = new Product(data);
-  return product.save();
+  return await product.save();
+};
+
+export const addVariant = async (
+  productId: string,
+  variantData: any
+): Promise<Product | null> => {
+  return await Product.findByIdAndUpdate(
+    productId,
+    {
+      $push: { variants: variantData }
+    },
+    { new: true }
+  );
+};
+
+export const updateVariant = async (
+  productId: string,
+  variantId: string,
+  variantData: any
+): Promise<Product | null> => {
+  return await Product.findOneAndUpdate(
+    { 
+      _id: productId,
+      "variants._id": variantId 
+    },
+    {
+      $set: {
+        "variants.$": variantData
+      }
+    },
+    { new: true }
+  );
+};
+
+export const deleteVariant = async (
+  productId: string,
+  variantId: string
+): Promise<Product | null> => {
+  return await Product.findByIdAndUpdate(
+    productId,
+    {
+      $pull: { variants: { _id: variantId } }
+    },
+    { new: true }
+  );
 };

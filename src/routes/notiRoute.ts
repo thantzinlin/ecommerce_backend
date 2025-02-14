@@ -6,5 +6,6 @@ const router = Router();
 
 router.get("/count", isAuth, notiController.getUnreadCount);
 router.get("/", isAuth, notiController.getAllNotification);
+router.post("/sendotp", notiController.sendMessage);
 
 export default router;

@@ -5,8 +5,8 @@ import isAuth from "../middleware/authMiddleware";
 const router = Router();
 router.get("/getall", isAuth, categoryController.getALLForAdmin);
 router.get("/", categoryController.getALL);
+router.get("/getBySlug", categoryController.getBySlug);
 router.get("/:id", categoryController.getById);
-router.get("/:slug", categoryController.getBySlug);
 
 //router.get("/:id", categoryController.getById);
 

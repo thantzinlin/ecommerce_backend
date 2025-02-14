@@ -17,6 +17,7 @@ import { setupSwagger } from "./config/swagger";
 
 const app: Application = express();
 app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 app.use((req: Request, res: Response, next: NextFunction) => {
   const start = Date.now();

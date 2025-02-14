@@ -144,7 +144,7 @@ export const create = async (
 
     const { images } = req.body;
 
-    if (!Array.isArray(images) || images.length === 0) {
+    if (images.length !== 0) {
       throw new Error("At least one image is required");
     }
 
