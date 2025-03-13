@@ -14,7 +14,7 @@ router.post("/", isAuth, orderController.create);
 
 router.put("/:id", isAuth, orderController.findByIdAndUpdate);
 router.delete("/:id", isAuth, orderController.findByIdAndDelete);
-//router.get("/report/:format", isAuth, orderController.downloadReport);
+router.get("/report/:format", isAuth, orderController.downloadReport);
 
 //router.post("/book", bookingController.createBooking);
 
