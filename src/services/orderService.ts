@@ -2,30 +2,50 @@ import { Counter } from "../models/counter";
 import { Order } from "../models/order";
 
 export const getAll = async (
-  skip: number,
-  limit: number,
-  search: string = ""
+  filters: {
+    fromDate?: string;
+    toDate?: string;
+    page?: string;
+    perPage?: string;
+    orderStatus?: string;
+    paymentStatus?: string;
+    search?: string;
+  } = {},
+  skip?: number,
+  limit?: number,
 ): Promise<{
   data: any[];
   total: number;
   pageCounts: number;
 }> => {
   const query: any = { isDeleted: false };
-  if (search) {
-    query.$or = [
-      { name: { $regex: search, $options: "i" } },
-      { description: { $regex: search, $options: "i" } },
-    ];
+
+  // Apply filters dynamically
+  if (filters.fromDate && filters.toDate) {
+    query.orderDate = {
+      $gte: new Date(filters.fromDate),
+      $lte: new Date(filters.toDate),
+    };
+  }
+  if (filters.orderStatus) {
+    query.orderStatus = filters.orderStatus;
+  }
+  if (filters.paymentStatus) {
+    query.paymentStatus = filters.paymentStatus;
   }
 
-  const total = await Order.countDocuments(query);
-  const pageCounts = Math.ceil(total / limit);
+  // Search condition
+  const searchCondition = filters.search
+    ? {
+        $or: [
+          { orderNumber: { $regex: filters.search, $options: "i" } },
+          { "user.username": { $regex: filters.search, $options: "i" } },
+        ],
+      }
+    : {};
 
-  const data = await Order.aggregate([
-    { $match: query },
-    { $sort: { orderDate: -1 } },
-    { $skip: skip },
-    { $limit: limit },
+  // Aggregation pipeline for both total count and data retrieval
+  const aggregationPipeline: any[] = [
     {
       $lookup: {
         from: "users",
@@ -40,27 +60,53 @@ export const getAll = async (
         preserveNullAndEmptyArrays: true,
       },
     },
+    { 
+      $match: { ...query, ...searchCondition } 
+    }
+  ];
+
+  // Get total count in one query
+  const [countResult] = await Order.aggregate([
+    ...aggregationPipeline,
+    { $count: "total" },
+  ]);
+  const total = countResult ? countResult.total : 0;
+
+  // Add sorting and projection to main query
+  aggregationPipeline.push(
+    { $sort: { orderDate: -1 } },
     {
       $project: {
         _id: 1,
-        username: "$user.username",
+        customerName: "$user.username",
         orderNumber: 1,
         orderStatus: 1,
-        totalPrice: 1,
+        totalAmount: 1,
         paymentMethod: 1,
-        status: 1,
+        paymentStatus: 1,
         orderDate: 1,
         shippingAddress: 1,
       },
-    },
-  ]).exec();
+    }
+  );
+
+  // Apply pagination if required
+  if (typeof skip === 'number' && typeof limit === 'number') {
+    aggregationPipeline.push({ $skip: skip }, { $limit: limit });
+  }
+
+  // Execute the optimized aggregation
+  const data = await Order.aggregate(aggregationPipeline).exec();
 
   return {
     data,
     total,
-    pageCounts,
+    pageCounts: limit ? Math.ceil(total / limit) : 1,
   };
 };
+
+
+
 
 export const getById = async (id: string): Promise<Order | null> => {
   const order: any = await Order.findById(id)
@@ -170,4 +216,78 @@ export const generateOrderNumber = async (): Promise<string> => {
 
   const formattedSequence = counter.sequence.toString().padStart(6, "0");
   return `ORD-${today}-${formattedSequence}`;
+};
+export const getOrdersForReport = async ({
+  dateRange,
+  status,
+  paymentStatus,
+  search
+}: {
+  dateRange: string;
+  status: string;
+  paymentStatus: string;
+  search: string;
+}): Promise<Order[]> => {
+  const query: any = { isDeleted: false };
+
+  // Handle date range filter
+  if (dateRange) {
+    const [startDate, endDate] = dateRange.split(',');
+    query.orderDate = {
+      $gte: new Date(startDate),
+      $lte: new Date(endDate)
+    };
+  }
+
+  // Handle order status filter
+  if (status) {
+    query.orderStatus = status;
+  }
+
+  // Handle payment status filter
+  if (paymentStatus) {
+    query.paymentStatus = paymentStatus;
+  }
+
+  // Handle search
+  if (search) {
+    query.$or = [
+      { orderNumber: { $regex: search, $options: "i" } },
+      { "user.username": { $regex: search, $options: "i" } }
+    ];
+  }
+
+  const orders = await Order.aggregate([
+    { $match: query },
+    { $sort: { orderDate: -1 } },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $unwind: {
+        path: "$user",
+        preserveNullAndEmptyArrays: true
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        orderNumber: 1,
+        username: "$user.username",
+        orderStatus: 1,
+        paymentStatus: 1,
+        totalPrice: 1,
+        orderDate: 1,
+        products: 1,
+        shippingAddress: 1
+      }
+    }
+  ]).exec();
+
+  return orders;
 };

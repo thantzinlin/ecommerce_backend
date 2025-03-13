@@ -42,6 +42,20 @@ export const getById = async (
 ): Promise<void> => {
   try {
     const data = await productService.getById(req.params.id);
+
+    const variantAttributes = [
+      { name: "Size", values: [...new Set(data?.variants?.map((v: { size: string }) => v.size))] },
+      { name: "Color", values: [...new Set(data?.variants?.map((v: { color: string }) => v.color))] }
+    ];
+
+    const variantsWithAttributes = data?.variants?.map((variant: any) => ({
+      ...variant, 
+      attributeValues: {
+        Size: variant.size, 
+        Color: variant.color 
+      }
+    }));
+
     if (!data) {
       return sendResponse(
         res,
@@ -50,7 +64,11 @@ export const getById = async (
         ResponseMessages.NOT_FOUND
       );
     } else {
-      return sendResponse(res, data);
+      return sendResponse(res, {
+        ...data,
+        variants: variantsWithAttributes, 
+        attributes: variantAttributes 
+      });
     }
   } catch (error) {
     return next(error);

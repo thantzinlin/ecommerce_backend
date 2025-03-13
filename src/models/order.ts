@@ -14,7 +14,7 @@ export interface Order extends Document {
   tax: number;
   shippingCharge: number;
   subTotal: number;
-  totalPrice: number;
+  totalAmount: number;
   orderStatus: string;
   paymentMethod: string;
   paymentStatus: string;
@@ -56,7 +56,7 @@ const OrderSchema: Schema = new Schema(
     tax: { type: Number, default: 0, required: false },
     shippingCharge: { type: Number, default: 0, required: false },
     subTotal: { type: Number, default: 0, required: true },
-    totalPrice: { type: Number, required: true },
+    totalAmount: { type: Number, required: true },
     orderStatus: { type: String, default: "Pending", required: true },
     paymentMethod: { type: String, required: true },
     orderDate: { type: Date, default: Date.now },

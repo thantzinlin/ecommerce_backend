@@ -319,6 +319,11 @@ Usage Summary
 This schema design is optimized for real-world scalability, supporting complex product variants, user and order relationships, and detailed product categorization and review systems. It leverages MongoDB’s flexibility for embedded documents and arrays to reduce the need for frequent joins, enhancing performance and usability in an eCommerce application.
 
 
+db.orders.createIndex({ orderDate: -1 });
+db.orders.createIndex({ orderNumber: 1 });
+db.orders.createIndex({ userId: 1 });
+db.users.createIndex({ username: 1 });
+
 
 
 

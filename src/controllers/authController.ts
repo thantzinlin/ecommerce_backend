@@ -54,7 +54,7 @@ export const login = async (
       );
     }
 
-    const authtoken = token.createToken(user);
+    const authtoken = token.createToken((user._id as string).toString(), user.role);
     const userinfo = excludeKey(user, "password");
     const data = {
       ...userinfo,

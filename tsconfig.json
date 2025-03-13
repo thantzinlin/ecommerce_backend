@@ -17,7 +17,7 @@
     "moduleResolution": "node", // Resolve modules as Node.js does
     "allowSyntheticDefaultImports": true // Allow default imports from modules without default export
   },
-  "include": ["src/**/*", "test/productController.test.ts"], // Include all TypeScript files in `src` folder
+  "include": ["src/**/*"], // Include all TypeScript files in `src` folder
   "exclude": [
     "node_modules", // Exclude node_modules
     "**/*.spec.ts", // Exclude test files

@@ -130,7 +130,7 @@ export const getByIdWithReview = async (
 };
 
 export const getById = async (id: string): Promise<Product | null> => {
-  return Product.findById(id);
+  return Product.findById(id).lean();
 };
 
 export const getByCategoryId = async (

@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from "express";
-import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
+  import jwt, { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 import { Users } from "../models/user";
 import { Token } from "../utils/tokenInterface";
 import token from "../utils/token";
 import HttpException from "../utils/httpException";
 import { Socket } from "socket.io";
+import { ResponseMessages, StatusCodes } from "../utils/constants";
 
 async function isAuth(
   req: Request,
@@ -14,7 +15,7 @@ async function isAuth(
   const bearer = req.headers.authorization;
 
   if (!bearer || !bearer.startsWith("Bearer ")) {
-    return next(new HttpException(401, "Unauthorised"));
+    return next(new HttpException(StatusCodes.UNAUTHORIZED, ResponseMessages.UNAUTHORIZED));
   }
 
   const accessToken = bearer.split("Bearer ")[1].trim();
@@ -24,39 +25,39 @@ async function isAuth(
     );
 
     if (payload instanceof jwt.JsonWebTokenError) {
-      return next(new HttpException(401, "Unauthorised"));
+      return next(new HttpException(StatusCodes.UNAUTHORIZED, ResponseMessages.UNAUTHORIZED));
     }
 
     const user = await Users.findById(payload.id).select("-password").exec();
 
     if (!user) {
-      return next(new HttpException(401, "Unauthorised"));
+      return next(new HttpException(StatusCodes.UNAUTHORIZED,  ResponseMessages.UNAUTHORIZED));
     }
 
     // (req as any).user = user;
     req.body.userId = user._id;
-
     //req.user = user;
+
+   (req as any).user = user;
 
     return next();
   } catch (error) {
     if (error instanceof TokenExpiredError) {
-      return next(new HttpException(401, "Token expired"));
+      return next(new HttpException(StatusCodes.UNAUTHORIZED, ResponseMessages.EXPIRED));
     }
 
     if (error instanceof JsonWebTokenError) {
-      return next(new HttpException(401, "Invalid token"));
+      return next(new HttpException(StatusCodes.UNAUTHORIZED, ResponseMessages.INVALID_TOKEN));
     }
 
-    return next(new HttpException(500, "Internal server error"));
+    return next(new HttpException(StatusCodes.INTERNAL_SERVER_ERROR, ResponseMessages.SERVER_ERROR));
 
     // return next(new HttpException(401, "Unauthorised"));
   }
 }
 
-export default isAuth;
 
-export const isAuthSocket = async (
+ const isAuthSocket = async (
   socket: Socket,
   next: (err?: Error) => void
 ) => {
@@ -90,3 +91,18 @@ export const isAuthSocket = async (
     next(new Error("Internal server error"));
   }
 };
+
+const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if ((req as any).user && (req as any).user.role === 'admin') {
+      next();
+    } else {
+      return next(new HttpException(StatusCodes.FORBIDDEN, ResponseMessages.ACCESS_DENIED));
+    }
+  } catch (error) {
+    return next(new HttpException(StatusCodes.INTERNAL_SERVER_ERROR, ResponseMessages.SERVER_ERROR));
+  }
+};
+
+
+export { isAuth as default , isAuthSocket, isAdmin };
