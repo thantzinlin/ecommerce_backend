@@ -4,8 +4,8 @@ import isAuth from "../middleware/authMiddleware";
 
 const router = Router();
 
-router.post("/", isAuth, cartController.addToCart);
-router.get("/", isAuth, cartController.getCartItem);
-router.get("/count", isAuth, cartController.getCartItemCount);
+router.post("/", cartController.addToCart);
+router.get("/", cartController.getCartItem);
+router.get("/count", cartController.getCartItemCount);
 
 export default router;

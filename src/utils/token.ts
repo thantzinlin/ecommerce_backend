@@ -2,15 +2,15 @@ import jwt from "jsonwebtoken";
 import { IUsers, Users } from "../models/user";
 import { Token } from "./tokenInterface";
 
-export const createToken = ( id: string,role: string): string => {
+export const createToken = (id: string, role: string): string => {
   return jwt.sign(
-    { 
-      id: id,
-      role: role 
-    }, 
-    process.env.JWT_SECRET as jwt.Secret, 
     {
-      expiresIn: "1d",
+      id: id,
+      role: role,
+    },
+    process.env.JWT_SECRET as jwt.Secret,
+    {
+      expiresIn: "30d",
     }
   );
 };

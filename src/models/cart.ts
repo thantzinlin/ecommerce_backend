@@ -2,23 +2,28 @@ import mongoose, { Schema, Document } from "mongoose";
 
 interface CartProduct {
   productId: mongoose.Types.ObjectId;
+  variantId?: mongoose.Types.ObjectId;
   quantity: number;
 }
 
-export interface Cart extends Document {
+export interface ICart extends Document {
   userId: mongoose.Types.ObjectId;
   products: CartProduct[];
 }
 
 const CartSchema: Schema = new Schema(
   {
-    userId: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+    userId: { type: mongoose.Types.ObjectId, ref: "User", required: false },
     products: [
       {
         productId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
           required: true,
+        },
+        variantId: {
+          type: mongoose.Schema.Types.ObjectId,
+          required: false,
         },
         quantity: {
           type: Number,
@@ -33,4 +38,4 @@ const CartSchema: Schema = new Schema(
   }
 );
 
-export const Cart = mongoose.model<Cart>("Cart", CartSchema);
+export const Cart = mongoose.model<ICart>("Cart", CartSchema);

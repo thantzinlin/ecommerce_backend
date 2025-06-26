@@ -49,7 +49,7 @@ const OrderSchema: Schema = new Schema(
         // imageurl: { type: String, required: true },
         quantity: { type: Number, required: true },
         price: { type: Number, required: true },
-        discount: { type: Number, required: true },
+        discount: { type: Number, required: false },
         subtotal: { type: Number, required: true },
       },
     ],

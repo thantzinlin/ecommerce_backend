@@ -8,16 +8,16 @@ export const getAllUsers = async (
 };
 
 export const getUserById = async (id: string): Promise<IUsers | null> => {
-  return Users.findById(id);
+  return await Users.findById(id);
 };
 
 export const updateUser = async (
   id: string,
   userData: Partial<IUsers>
 ): Promise<IUsers | null> => {
-  return Users.findByIdAndUpdate(id, userData, { new: true });
+  return await Users.findByIdAndUpdate(id, userData, { new: true });
 };
 
 export const deleteUser = async (id: string): Promise<IUsers | null> => {
-  return Users.findByIdAndDelete(id);
+  return await Users.findByIdAndDelete(id);
 };

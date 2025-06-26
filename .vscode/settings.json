@@ -1,4 +1,5 @@
 {
+  "editor.formatOnSave": true,
   "appService.zipIgnorePattern": ["node_modules{,/**}", ".vscode{,/**}"],
   "appService.defaultWebAppToDeploy": "/subscriptions/db8c041b-9822-4035-bf34-4a2326eda1bb/resourceGroups/backend/providers/Microsoft.Web/sites/ecomm-api",
   "appService.deploySubpath": "dist"

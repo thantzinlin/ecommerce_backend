@@ -13,6 +13,7 @@ export interface IUsers extends Document {
     postalCode: number;
   };
   role: string;
+  isRegistered: boolean;
   isDeleted: boolean;
 }
 
@@ -20,7 +21,7 @@ const userSchema: Schema = new Schema(
   {
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: false },
     phone: { type: String, required: true, unique: true },
     address: {
       street: { type: String, required: false },
@@ -29,6 +30,7 @@ const userSchema: Schema = new Schema(
       postalCode: { type: String, required: false },
     },
     role: { type: String, required: false },
+    isRegistered: { type: Boolean, default: false },
     isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }

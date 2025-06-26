@@ -1,9 +1,10 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface ProductVariant {
+  _id?: mongoose.Types.ObjectId;
   size: string;
   color: string;
-  weight: number;
+  weight: string;
   sku: string;
   price: number;
   stockQuantity: number;
@@ -18,6 +19,7 @@ export interface Product extends Document {
   stockQuantity: number;
   images?: string[];
   variants?: ProductVariant[];
+  discountId: mongoose.Types.ObjectId;
 }
 
 const ProductSchema: Schema = new Schema(
@@ -34,21 +36,27 @@ const ProductSchema: Schema = new Schema(
     images: [String],
     variants: [
       {
-        size: { type: String},
+        size: { type: String },
         color: { type: String },
-        weight: { type: Number},
-        sku: { type: String},
-        price: { type: Number},
+        weight: { type: String },
+        sku: { type: String },
+        price: { type: Number },
         stockQuantity: { type: Number },
         images: [String],
       },
     ],
+    discountId: {
+      type: Schema.Types.ObjectId,
+      ref: "Discount",
+      required: false,
+    },
     isDeleted: { type: Boolean, default: false },
   },
+
   { timestamps: true }
 );
 
 // Create a compound index for unique SKU within variants
-ProductSchema.index({ "variants.sku": 1 }, { unique: true });
+// ProductSchema.index({ "variants.sku": 1 }, { unique: true });
 
 export const Product = mongoose.model<Product>("Product", ProductSchema);

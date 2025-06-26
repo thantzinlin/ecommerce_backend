@@ -13,6 +13,8 @@ import notiRoute from "./routes/notiRoute";
 import cartRoute from "./routes/cartRoute";
 import cityRoute from "./routes/cityRoute";
 import townshipRoute from "./routes/townshipRoute";
+import discountRoute from "./routes/discountRoute";
+
 import { setupSwagger } from "./config/swagger";
 
 const app: Application = express();
@@ -62,6 +64,7 @@ app.use("/api/notifications", notiRoute);
 app.use("/api/cart", cartRoute);
 app.use("/api/cities", cityRoute);
 app.use("/api/townships", townshipRoute);
+app.use("/api/discounts", discountRoute);
 
 app.use(errorMiddleware);
 

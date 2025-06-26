@@ -4,6 +4,7 @@ import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 import cloudinary from "../config/cloudinaryConfig";
 import logger from "../utils/logger";
+import { hash } from "crypto";
 
 export const getALL = async (
   req: Request,
@@ -43,17 +44,46 @@ export const getById = async (
   try {
     const data = await productService.getById(req.params.id);
 
-    const variantAttributes = [
-      { name: "Size", values: [...new Set(data?.variants?.map((v: { size: string }) => v.size))] },
-      { name: "Color", values: [...new Set(data?.variants?.map((v: { color: string }) => v.color))] }
-    ];
+    const variantAttributes: { name: string; values: string[] }[] = [];
 
-    const variantsWithAttributes = data?.variants?.map((variant: any) => ({
-      ...variant, 
-      attributeValues: {
-        Size: variant.size, 
-        Color: variant.color 
+    if (Array.isArray(data?.variants) && data.variants.length > 0) {
+      const hasSize = data.variants.some((v: any) => v.size);
+      const hasColor = data.variants.some((v: any) => v.color);
+      const hasWeight = data.variants.some((v: any) => v.weight);
+
+      if (hasSize) {
+        variantAttributes.push({
+          name: "Size",
+          values: [
+            ...new Set(data.variants.map((v: any) => v.size).filter(Boolean)),
+          ],
+        });
       }
+
+      if (hasColor) {
+        variantAttributes.push({
+          name: "Color",
+          values: [
+            ...new Set(data.variants.map((v: any) => v.color).filter(Boolean)),
+          ],
+        });
+      }
+      if (hasWeight) {
+        variantAttributes.push({
+          name: "Weight",
+          values: [
+            ...new Set(data.variants.map((v: any) => v.weight).filter(Boolean)),
+          ],
+        });
+      }
+    }
+    const variantsWithAttributes = data?.variants?.map((variant: any) => ({
+      ...variant,
+      attributeValues: {
+        Size: variant.size,
+        Color: variant.color,
+        Weight: variant.weight,
+      },
     }));
 
     if (!data) {
@@ -66,8 +96,8 @@ export const getById = async (
     } else {
       return sendResponse(res, {
         ...data,
-        variants: variantsWithAttributes, 
-        attributes: variantAttributes 
+        variants: variantsWithAttributes,
+        attributes: (data.variants ?? []).length > 0 ? variantAttributes : [],
       });
     }
   } catch (error) {
@@ -162,7 +192,7 @@ export const create = async (
 
     const { images } = req.body;
 
-    if (images.length !== 0) {
+    if (images.length === 0) {
       throw new Error("At least one image is required");
     }
 

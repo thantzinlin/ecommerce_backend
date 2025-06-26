@@ -1,5 +1,8 @@
+import mongoose from "mongoose";
 import { Counter } from "../models/counter";
 import { Order } from "../models/order";
+import { Cart } from "../models/cart";
+import { Product } from "../models/product";
 
 export const getAll = async (
   filters: {
@@ -12,7 +15,7 @@ export const getAll = async (
     search?: string;
   } = {},
   skip?: number,
-  limit?: number,
+  limit?: number
 ): Promise<{
   data: any[];
   total: number;
@@ -60,9 +63,9 @@ export const getAll = async (
         preserveNullAndEmptyArrays: true,
       },
     },
-    { 
-      $match: { ...query, ...searchCondition } 
-    }
+    {
+      $match: { ...query, ...searchCondition },
+    },
   ];
 
   // Get total count in one query
@@ -91,7 +94,7 @@ export const getAll = async (
   );
 
   // Apply pagination if required
-  if (typeof skip === 'number' && typeof limit === 'number') {
+  if (typeof skip === "number" && typeof limit === "number") {
     aggregationPipeline.push({ $skip: skip }, { $limit: limit });
   }
 
@@ -104,9 +107,6 @@ export const getAll = async (
     pageCounts: limit ? Math.ceil(total / limit) : 1,
   };
 };
-
-
-
 
 export const getById = async (id: string): Promise<Order | null> => {
   const order: any = await Order.findById(id)
@@ -132,11 +132,11 @@ export const getById = async (id: string): Promise<Order | null> => {
   return order;
 };
 
-export const findByIdAndUpdate = async (
+export const updateOrderStatus = async (
   id: string,
-  data: Partial<Order>
+  status: string
 ): Promise<Order | null> => {
-  return Order.findByIdAndUpdate(id, data, { new: true });
+  return Order.findByIdAndUpdate(id, { orderStatus: status }, { new: true });
 };
 
 export const findByIdAndDelete = async (id: string): Promise<Order | null> => {
@@ -150,7 +150,7 @@ export const create = async (data: Order): Promise<Order> => {
 
 export const getOrdersByUserId = async (userId: string): Promise<Order[]> => {
   const orders = await Order.find({ userId })
-    .select("orderNumber products orderDate orderStatus totalPrice")
+    .select("orderNumber products orderDate orderStatus totalAmount")
     .populate({
       path: "products.productId",
       select: "name images",
@@ -221,7 +221,7 @@ export const getOrdersForReport = async ({
   dateRange,
   status,
   paymentStatus,
-  search
+  search,
 }: {
   dateRange: string;
   status: string;
@@ -232,10 +232,10 @@ export const getOrdersForReport = async ({
 
   // Handle date range filter
   if (dateRange) {
-    const [startDate, endDate] = dateRange.split(',');
+    const [startDate, endDate] = dateRange.split(",");
     query.orderDate = {
       $gte: new Date(startDate),
-      $lte: new Date(endDate)
+      $lte: new Date(endDate),
     };
   }
 
@@ -253,7 +253,7 @@ export const getOrdersForReport = async ({
   if (search) {
     query.$or = [
       { orderNumber: { $regex: search, $options: "i" } },
-      { "user.username": { $regex: search, $options: "i" } }
+      { "user.username": { $regex: search, $options: "i" } },
     ];
   }
 
@@ -265,14 +265,14 @@ export const getOrdersForReport = async ({
         from: "users",
         localField: "userId",
         foreignField: "_id",
-        as: "user"
-      }
+        as: "user",
+      },
     },
     {
       $unwind: {
         path: "$user",
-        preserveNullAndEmptyArrays: true
-      }
+        preserveNullAndEmptyArrays: true,
+      },
     },
     {
       $project: {
@@ -284,10 +284,78 @@ export const getOrdersForReport = async ({
         totalPrice: 1,
         orderDate: 1,
         products: 1,
-        shippingAddress: 1
-      }
-    }
+        shippingAddress: 1,
+      },
+    },
   ]).exec();
 
   return orders;
+};
+
+export const validateCartStock = async (cartId: string): Promise<void> => {
+  const cart = await Cart.findById(new mongoose.Types.ObjectId(cartId));
+
+  if (!cart || cart.products.length === 0) {
+    throw new Error("Cart not found or is empty.");
+  }
+
+  for (const item of cart.products) {
+    const product = await Product.findById(item.productId);
+
+    if (!product) {
+      throw new Error(`Product not found (ID: ${item.productId})`);
+    }
+
+    if (product.variants && product.variants.length > 0 && item.variantId) {
+      const variant = product.variants.find(
+        (v) => v._id?.toString() === item.variantId?.toString()
+      );
+
+      if (!variant) {
+        throw new Error(`Variant not found for product "${product.name}".`);
+      }
+
+      if (variant.stockQuantity < item.quantity) {
+        throw new Error(
+          `Insufficient stock for "${product.name}" variant (Color: ${variant.color}, Size: ${variant.size}). Available: ${variant.stockQuantity}, Requested: ${item.quantity}`
+        );
+      }
+    } else {
+      if (product.stockQuantity < item.quantity) {
+        throw new Error(
+          `Insufficient stock for "${product.name}". Available: ${product.stockQuantity}, Requested: ${item.quantity}`
+        );
+      }
+    }
+  }
+};
+
+export const deductCartStock = async (cartId: string): Promise<void> => {
+  const cart = await Cart.findById(cartId);
+  if (!cart || cart.products.length === 0) {
+    throw new Error("Cart not found or is empty.");
+  }
+
+  for (const item of cart.products) {
+    const product = await Product.findById(item.productId);
+    if (!product) {
+      throw new Error(`Product not found (ID: ${item.productId})`);
+    }
+
+    if (product.variants && product.variants.length > 0 && item.variantId) {
+      const variant = product.variants.find(
+        (v) => v._id?.toString() === item.variantId?.toString()
+      );
+
+      if (!variant) {
+        throw new Error(`Variant not found for product "${product.name}".`);
+      }
+
+      variant.stockQuantity -= item.quantity;
+    } else {
+      product.stockQuantity -= item.quantity;
+    }
+
+    await product.save();
+  }
 };

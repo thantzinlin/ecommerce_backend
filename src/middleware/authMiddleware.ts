@@ -92,17 +92,71 @@ async function isAuth(
   }
 };
 
-const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
+// const isAdmin = async (req: Request, res: Response, next: NextFunction) => {
+//   try {
+//     if ((req as any).user && (req as any).user.role === 'admin') {
+//       next();
+//     } else {
+//       return next(new HttpException(StatusCodes.FORBIDDEN, ResponseMessages.ACCESS_DENIED));
+//     }
+//   } catch (error) {
+//     return next(new HttpException(StatusCodes.INTERNAL_SERVER_ERROR, ResponseMessages.SERVER_ERROR));
+//   }
+// };
+
+
+async function isAdminAuth(
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<Response | void> {
+  const bearer = req.headers.authorization;
+
+  if (!bearer || !bearer.startsWith("Bearer ")) {
+    return next(new HttpException(StatusCodes.UNAUTHORIZED, ResponseMessages.UNAUTHORIZED));
+  }
+
+  const accessToken = bearer.split("Bearer ")[1].trim();
   try {
-    if ((req as any).user && (req as any).user.role === 'admin') {
-      next();
+    const payload: Token | jwt.JsonWebTokenError = await token.verifyToken(
+      accessToken
+    );
+
+    if (payload instanceof jwt.JsonWebTokenError) {
+      return next(new HttpException(StatusCodes.UNAUTHORIZED, ResponseMessages.UNAUTHORIZED));
+    }
+
+    const user = await Users.findById(payload.id).select("-password").exec();
+
+    if (!user) {
+      return next(new HttpException(StatusCodes.UNAUTHORIZED,  ResponseMessages.UNAUTHORIZED));
+    }
+
+    // (req as any).user = user;
+    req.body.userId = user._id;
+    //req.user = user;
+
+    if (user.role === 'admin') {
+      return next();
     } else {
       return next(new HttpException(StatusCodes.FORBIDDEN, ResponseMessages.ACCESS_DENIED));
     }
+
   } catch (error) {
+    if (error instanceof TokenExpiredError) {
+      return next(new HttpException(StatusCodes.UNAUTHORIZED, ResponseMessages.EXPIRED));
+    }
+
+    if (error instanceof JsonWebTokenError) {
+      return next(new HttpException(StatusCodes.UNAUTHORIZED, ResponseMessages.INVALID_TOKEN));
+    }
+
     return next(new HttpException(StatusCodes.INTERNAL_SERVER_ERROR, ResponseMessages.SERVER_ERROR));
+
+    // return next(new HttpException(401, "Unauthorised"));
   }
-};
+}
 
 
-export { isAuth as default , isAuthSocket, isAdmin };
+
+export { isAuth as default , isAuthSocket, isAdminAuth };

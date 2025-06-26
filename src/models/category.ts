@@ -12,7 +12,7 @@ export interface Category extends Document {
 const CategorySchema: Schema = new Schema(
   {
     name: { type: String, required: true },
-    description: { type: String, required: true },
+    description: { type: String},
     slug: { type: String, required: true, unique: true },
     image: { type: String },
     isDeleted: { type: Boolean, default: false },

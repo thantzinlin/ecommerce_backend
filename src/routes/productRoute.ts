@@ -1,7 +1,6 @@
 import { Router } from "express";
 import * as productController from "../controllers/productController";
 import isAuth from "../middleware/authMiddleware";
-import upload from "../middleware/multerConfig";
 
 const router = Router();
 

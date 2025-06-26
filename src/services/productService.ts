@@ -21,6 +21,8 @@ export const getAll = async (
   const total = await Product.countDocuments(query);
   const pageCounts = Math.ceil(total / limit);
 
+  const now = new Date();
+
   const data = await Product.aggregate([
     { $match: query },
     { $skip: skip },
@@ -35,8 +37,8 @@ export const getAll = async (
     },
     {
       $unwind: {
-        path: "$category", // Unwind to handle array of categories, if necessary
-        preserveNullAndEmptyArrays: true, // Optional: Include products without a category
+        path: "$category",
+        preserveNullAndEmptyArrays: true,
       },
     },
     {
@@ -48,7 +50,35 @@ export const getAll = async (
       },
     },
     {
+      $lookup: {
+        from: "discounts",
+        localField: "discountId",
+        foreignField: "_id",
+        as: "discount",
+      },
+    },
+    {
+      $unwind: {
+        path: "$discount",
+        preserveNullAndEmptyArrays: true,
+      },
+    },
+    {
       $addFields: {
+        isDiscountActive: {
+          $cond: {
+            if: {
+              $and: [
+                { $ne: ["$discount", null] },
+                { $lte: ["$discount.startDate", now] },
+                { $gte: ["$discount.endDate", now] },
+                { $eq: ["$discount.isActive", true] },
+              ],
+            },
+            then: true,
+            else: false,
+          },
+        },
         averageRating: {
           $cond: {
             if: { $gt: [{ $size: "$reviews" }, 0] },
@@ -57,6 +87,104 @@ export const getAll = async (
           },
         },
         totalReviews: { $size: "$reviews" },
+        variants: {
+          $cond: {
+            if: { $gt: [{ $size: "$variants" }, 0] },
+            then: {
+              $map: {
+                input: "$variants",
+                as: "variant",
+                in: {
+                  $mergeObjects: [
+                    "$$variant",
+                    {
+                      discountedPrice: {
+                        $cond: {
+                          if: { $eq: ["$isDiscountActive", false] },
+                          then: "$$variant.price",
+                          else: {
+                            $cond: {
+                              if: {
+                                $eq: ["$discount.discountType", "percentage"],
+                              },
+                              then: {
+                                $subtract: [
+                                  "$$variant.price",
+                                  {
+                                    $multiply: [
+                                      "$$variant.price",
+                                      { $divide: ["$discount.value", 100] },
+                                    ],
+                                  },
+                                ],
+                              },
+                              else: {
+                                $cond: {
+                                  if: {
+                                    $eq: ["$discount.discountType", "fixed"],
+                                  },
+                                  then: {
+                                    $subtract: [
+                                      "$$variant.price",
+                                      "$discount.value",
+                                    ],
+                                  },
+                                  else: "$$variant.price",
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            else: "$variants",
+          },
+        },
+        discountedPrice: {
+          $cond: {
+            if: {
+              $or: [
+                { $lte: [{ $size: "$variants" }, 0] },
+                { $eq: ["$variants", null] },
+              ],
+            },
+            then: {
+              $cond: {
+                if: { $eq: ["$isDiscountActive", false] },
+
+                then: "$price",
+                else: {
+                  $cond: {
+                    if: { $eq: ["$discount.discountType", "percentage"] },
+                    then: {
+                      $subtract: [
+                        "$price",
+                        {
+                          $multiply: [
+                            "$price",
+                            { $divide: ["$discount.value", 100] },
+                          ],
+                        },
+                      ],
+                    },
+                    else: {
+                      $cond: {
+                        if: { $eq: ["$discount.discountType", "fixed"] },
+                        then: { $subtract: ["$price", "$discount.value"] },
+                        else: "$price",
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            else: null,
+          },
+        },
       },
     },
     {
@@ -66,6 +194,20 @@ export const getAll = async (
         stockQuantity: 1,
         description: 1,
         price: 1,
+        discountedPrice: 1,
+        discountId: 1,
+        discountType: "$discount.discountType",
+        discountValue: {
+          $cond: {
+            if: {
+              $eq: ["$isDiscountActive", true],
+            },
+            then: "$discount.value",
+            else: 0,
+          },
+        },
+
+        isDiscountActive: 1,
         categoryId: 1,
         categoryName: "$category.name",
         reviews: 1,
@@ -85,6 +227,213 @@ export const getAll = async (
   };
 };
 
+// export const getAll = async (
+//   skip: number,
+//   limit: number,
+//   search: string = ""
+// ): Promise<{
+//   data: any[];
+//   total: number;
+//   pageCounts: number;
+// }> => {
+//   const query: any = { isDeleted: false };
+//   if (search) {
+//     query.$or = [
+//       { name: { $regex: search, $options: "i" } },
+//       { description: { $regex: search, $options: "i" } },
+//     ];
+//   }
+
+//   const total = await Product.countDocuments(query);
+//   const pageCounts = Math.ceil(total / limit);
+
+//   const data = await Product.aggregate([
+//     { $match: query },
+//     { $skip: skip },
+//     { $limit: limit },
+//     {
+//       $lookup: {
+//         from: "categories",
+//         localField: "categoryId",
+//         foreignField: "_id",
+//         as: "category",
+//       },
+//     },
+//     {
+//       $unwind: {
+//         path: "$category", // Unwind to handle array of categories, if necessary
+//         preserveNullAndEmptyArrays: true, // Optional: Include products without a category
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "reviews",
+//         localField: "_id",
+//         foreignField: "productId",
+//         as: "reviews",
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "discounts",
+//         localField: "discountId",
+//         foreignField: "_id",
+//         as: "discount",
+//       },
+//     },
+//     {
+//       $unwind: {
+//         path: "$discount",
+//         preserveNullAndEmptyArrays: true,
+//       },
+//     },
+
+//     {
+//       $addFields: {
+//         averageRating: {
+//           $cond: {
+//             if: { $gt: [{ $size: "$reviews" }, 0] },
+//             then: { $avg: "$reviews.rating" },
+//             else: 0,
+//           },
+//         },
+//         totalReviews: { $size: "$reviews" },
+//         variants: {
+//           $cond: {
+//             if: { $gt: [{ $size: "$variants" }, 0] },
+//             then: {
+//               $map: {
+//                 input: "$variants",
+//                 as: "variant",
+//                 in: {
+//                   $mergeObjects: [
+//                     "$$variant",
+//                     {
+//                       discountedPrice: {
+//                         $cond: {
+//                           if: { $not: ["$discount"] },
+//                           then: "$$variant.price",
+//                           else: {
+//                             $cond: {
+//                               if: {
+//                                 $eq: ["$discount.discountType", "percentage"],
+//                               },
+//                               then: {
+//                                 $subtract: [
+//                                   "$$variant.price",
+//                                   {
+//                                     $multiply: [
+//                                       "$$variant.price",
+//                                       { $divide: ["$discount.value", 100] },
+//                                     ],
+//                                   },
+//                                 ],
+//                               },
+//                               else: {
+//                                 $cond: {
+//                                   if: {
+//                                     $eq: ["$discount.discountType", "fixed"],
+//                                   },
+//                                   then: {
+//                                     $subtract: [
+//                                       "$$variant.price",
+//                                       "$discount.value",
+//                                     ],
+//                                   },
+//                                   else: "$$variant.price",
+//                                 },
+//                               },
+//                             },
+//                           },
+//                         },
+//                       },
+//                     },
+//                   ],
+//                 },
+//               },
+//             },
+//             else: "$variants", // leave as is if empty
+//           },
+//         },
+//         discountedPrice: {
+//           $cond: {
+//             if: {
+//               $or: [
+//                 { $lte: [{ $size: "$variants" }, 0] },
+//                 { $eq: ["$variants", null] },
+//               ],
+//             },
+//             then: {
+//               $cond: {
+//                 if: { $not: ["$discount"] },
+//                 then: "$price",
+//                 else: {
+//                   $cond: {
+//                     if: { $eq: ["$discount.discountType", "percentage"] },
+//                     then: {
+//                       $subtract: [
+//                         "$price",
+//                         {
+//                           $multiply: [
+//                             "$price",
+//                             { $divide: ["$discount.value", 100] },
+//                           ],
+//                         },
+//                       ],
+//                     },
+//                     else: {
+//                       $cond: {
+//                         if: { $eq: ["$discount.discountType", "fixed"] },
+//                         then: { $subtract: ["$price", "$discount.value"] },
+//                         else: "$price",
+//                       },
+//                     },
+//                   },
+//                 },
+//               },
+//             },
+//             else: null, // don’t include if variants exist
+//           },
+//         },
+//       },
+
+//     },
+//     {
+//       $project: {
+//         name: 1,
+//         images: 1,
+//         stockQuantity: 1,
+//         description: 1,
+//         price: 1,
+//         discountedPrice: 1,
+//         discountId: 1,
+//         discountType: "$discount.discountType",
+//         discountValue: {
+//           $cond: {
+//             if: { $not: ["$discount"] },
+//             then: 0,
+//             else: "$discount.value",
+//           },
+//         },
+//         categoryId: 1,
+//         categoryName: "$category.name",
+//         reviews: 1,
+//         variants: 1,
+//         averageRating: 1,
+//         totalReviews: 1,
+//         createdAt: 1,
+//         updatedAt: 1,
+//       },
+//     },
+//   ]).exec();
+
+//   return {
+//     data,
+//     total,
+//     pageCounts,
+//   };
+// };
+
 export const getByIdWithReview = async (
   id: string
 ): Promise<Product | null> => {
@@ -101,6 +450,14 @@ export const getByIdWithReview = async (
       },
     },
     {
+      $lookup: {
+        from: "discounts",
+        localField: "discountId",
+        foreignField: "_id",
+        as: "discount",
+      },
+    },
+    {
       $addFields: {
         averageRating: {
           $cond: {
@@ -110,6 +467,123 @@ export const getByIdWithReview = async (
           },
         },
         totalReviews: { $size: "$reviews" },
+
+        // Calculate discounted price for base product
+        discountedPrice: {
+          $cond: {
+            if: { $eq: [{ $size: "$discount" }, 0] },
+            then: "$price",
+            else: {
+              $cond: {
+                if: {
+                  $eq: [
+                    { $arrayElemAt: ["$discount.discountType", 0] },
+                    "percentage",
+                  ],
+                },
+                then: {
+                  $subtract: [
+                    "$price",
+                    {
+                      $multiply: [
+                        "$price",
+                        {
+                          $divide: [
+                            { $arrayElemAt: ["$discount.value", 0] },
+                            100,
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+                else: {
+                  $cond: {
+                    if: {
+                      $eq: [
+                        { $arrayElemAt: ["$discount.discountType", 0] },
+                        "fixed",
+                      ],
+                    },
+                    then: {
+                      $subtract: [
+                        "$price",
+                        { $arrayElemAt: ["$discount.value", 0] },
+                      ],
+                    },
+                    else: "$price",
+                  },
+                },
+              },
+            },
+          },
+        },
+
+        // Calculate discounted price for each variant
+        discountedVariants: {
+          $map: {
+            input: "$variants",
+            as: "variant",
+            in: {
+              $mergeObjects: [
+                "$$variant",
+                {
+                  discountedPrice: {
+                    $cond: {
+                      if: { $eq: [{ $size: "$discount" }, 0] },
+                      then: "$$variant.price",
+                      else: {
+                        $cond: {
+                          if: {
+                            $eq: [
+                              { $arrayElemAt: ["$discount.discountType", 0] },
+                              "percentage",
+                            ],
+                          },
+                          then: {
+                            $subtract: [
+                              "$$variant.price",
+                              {
+                                $multiply: [
+                                  "$$variant.price",
+                                  {
+                                    $divide: [
+                                      { $arrayElemAt: ["$discount.value", 0] },
+                                      100,
+                                    ],
+                                  },
+                                ],
+                              },
+                            ],
+                          },
+                          else: {
+                            $cond: {
+                              if: {
+                                $eq: [
+                                  {
+                                    $arrayElemAt: ["$discount.discountType", 0],
+                                  },
+                                  "fixed",
+                                ],
+                              },
+                              then: {
+                                $subtract: [
+                                  "$$variant.price",
+                                  { $arrayElemAt: ["$discount.value", 0] },
+                                ],
+                              },
+                              else: "$$variant.price",
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              ],
+            },
+          },
+        },
       },
     },
     {
@@ -122,12 +596,135 @@ export const getByIdWithReview = async (
         reviews: 1,
         averageRating: 1,
         totalReviews: 1,
+        discountedPrice: 1,
+        discountId: 1,
+        discountType: { $arrayElemAt: ["$discount.discountType", 0] },
+        discountValue: {
+          $cond: {
+            if: { $eq: [{ $size: "$discount" }, 0] },
+            then: 0,
+            else: { $arrayElemAt: ["$discount.value", 0] },
+          },
+        },
+        variants: "$discountedVariants",
       },
     },
   ]).exec();
 
   return productWithReviews[0] || null;
 };
+
+// export const getByIdWithReview = async (
+//   id: string
+// ): Promise<Product | null> => {
+//   const productWithReviews = await Product.aggregate([
+//     {
+//       $match: { _id: new mongoose.Types.ObjectId(id), isDeleted: false },
+//     },
+//     {
+//       $lookup: {
+//         from: "reviews",
+//         localField: "_id",
+//         foreignField: "productId",
+//         as: "reviews",
+//       },
+//     },
+//     {
+//       $lookup: {
+//         from: "discounts",
+//         localField: "discountId",
+//         foreignField: "_id",
+//         as: "discount",
+//       },
+//     },
+//     {
+//       $addFields: {
+//         averageRating: {
+//           $cond: {
+//             if: { $gt: [{ $size: "$reviews" }, 0] },
+//             then: { $avg: "$reviews.rating" },
+//             else: 0,
+//           },
+//         },
+//         totalReviews: { $size: "$reviews" },
+//         discountedPrice: {
+//           $cond: {
+//             if: { $eq: [{ $size: "$discount" }, 0] },
+//             then: 0,
+//             else: {
+//               $cond: {
+//                 if: {
+//                   $eq: [
+//                     { $arrayElemAt: ["$discount.discountType", 0] },
+//                     "percentage",
+//                   ],
+//                 },
+//                 then: {
+//                   $subtract: [
+//                     "$price",
+//                     {
+//                       $multiply: [
+//                         "$price",
+//                         {
+//                           $divide: [
+//                             { $arrayElemAt: ["$discount.value", 0] },
+//                             100,
+//                           ],
+//                         },
+//                       ],
+//                     },
+//                   ],
+//                 },
+//                 else: {
+//                   $cond: {
+//                     if: {
+//                       $eq: [
+//                         { $arrayElemAt: ["$discount.discountType", 0] },
+//                         "fixed",
+//                       ],
+//                     },
+//                     then: {
+//                       $subtract: [
+//                         "$price",
+//                         { $arrayElemAt: ["$discount.value", 0] },
+//                       ],
+//                     },
+//                     else: 0,
+//                   },
+//                 },
+//               },
+//             },
+//           },
+//         },
+//       },
+//     },
+//     {
+//       $project: {
+//         name: 1,
+//         images: 1,
+//         stockQuantity: 1,
+//         description: 1,
+//         price: 1,
+//         reviews: 1,
+//         averageRating: 1,
+//         totalReviews: 1,
+//         variants: 1,
+//         discountedPrice: 1,
+//         discountId: 1,
+//         discountType: { $arrayElemAt: ["$discount.discountType", 0] },
+//         discountValue: {
+//           $cond: {
+//             if: { $eq: [{ $size: "$discount" }, 0] },
+//             then: 0,
+//             else: { $arrayElemAt: ["$discount.value", 0] },
+//           },
+//         },
+//       },
+//     },
+//   ]).exec();
+
+//   return productWithReviews[0] || null;
+// };
 
 export const getById = async (id: string): Promise<Product | null> => {
   return Product.findById(id).lean();
@@ -164,7 +761,7 @@ export const addVariant = async (
   return await Product.findByIdAndUpdate(
     productId,
     {
-      $push: { variants: variantData }
+      $push: { variants: variantData },
     },
     { new: true }
   );
@@ -176,14 +773,14 @@ export const updateVariant = async (
   variantData: any
 ): Promise<Product | null> => {
   return await Product.findOneAndUpdate(
-    { 
+    {
       _id: productId,
-      "variants._id": variantId 
+      "variants._id": variantId,
     },
     {
       $set: {
-        "variants.$": variantData
-      }
+        "variants.$": variantData,
+      },
     },
     { new: true }
   );
@@ -196,7 +793,7 @@ export const deleteVariant = async (
   return await Product.findByIdAndUpdate(
     productId,
     {
-      $pull: { variants: { _id: variantId } }
+      $pull: { variants: { _id: variantId } },
     },
     { new: true }
   );
