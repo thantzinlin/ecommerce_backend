@@ -4,7 +4,7 @@ import { sendResponse } from "../utils/responses";
 import { ResponseMessages, StatusCodes } from "../utils/constants";
 import { Product } from "../models/product";
 
-export const addDcount = async (
+export const addDiscount = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -15,6 +15,89 @@ export const addDcount = async (
     );
 
     return sendResponse(res, discountData, StatusCodes.CREATED);
+  } catch (error) {
+    return next(error);
+  }
+};
+export const applyCupon = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { cuponCode, cartTotal } = req.body;
+
+    const coupon = await discountService.getByCuponCode(cuponCode);
+    const now = new Date();
+
+    if (!coupon) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.RESOURCE_NOT_FOUND,
+        "Invalid coupon code"
+      );
+    }
+
+    if (coupon.startDate && now < coupon.startDate) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.BAD_REQUEST,
+        "Coupon is not active yet"
+      );
+    }
+
+    if (coupon.endDate && now > coupon.endDate) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.BAD_REQUEST,
+        "Coupon has expired"
+      );
+    }
+
+    if (cartTotal < coupon.minPurchase) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.BAD_REQUEST,
+        `Minimum cart value should be ${coupon.minPurchase}`
+      );
+    }
+
+    if (coupon.startDate && now < coupon.startDate) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.BAD_REQUEST,
+        "Coupon is not active yet"
+      );
+    }
+
+    if (coupon.usedCount >= coupon.usageLimit) {
+      return sendResponse(
+        res,
+        {},
+        StatusCodes.BAD_REQUEST,
+        "Coupon usage limit exceeded"
+      );
+    }
+
+    let discount = 0;
+    if (coupon.discountType === "percentage") {
+      discount = (cartTotal * coupon.value) / 100;
+    } else {
+      discount = coupon.value;
+    }
+
+    const discountedAmount = cartTotal - discount;
+
+    return sendResponse(res, {
+      cupon: cuponCode,
+      discountedAmount,
+      discount,
+    });
   } catch (error) {
     return next(error);
   }
@@ -90,7 +173,7 @@ export const findByIdAndUpdate = async (
         ResponseMessages.NOT_FOUND
       );
     } else {
-      return sendResponse(res);
+      return sendResponse(res, data, StatusCodes.OK, ResponseMessages.SUCCESS);
     }
   } catch (error) {
     return next(error);

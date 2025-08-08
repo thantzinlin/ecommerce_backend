@@ -11,11 +11,18 @@ router.post(
   isAuth,
   validateAddDiscount,
   handleValidation,
-  discountController.addDcount
+  discountController.addDiscount
 );
+router.post("/applyCupon", discountController.applyCupon);
 router.get("/", isAuth, discountController.getALL);
 router.get("/:id", isAuth, discountController.getById);
-router.put("/:id", isAuth, discountController.findByIdAndUpdate);
+router.put(
+  "/:id",
+  isAuth,
+  validateAddDiscount,
+  handleValidation,
+  discountController.findByIdAndUpdate
+);
 router.delete("/:id", isAuth, discountController.findByIdAndDelete);
 
 export default router;

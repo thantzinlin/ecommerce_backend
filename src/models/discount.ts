@@ -10,7 +10,10 @@ export interface IDiscount extends Document {
   endDate: Date;
   minPurchase: number;
   usageLimit: number;
-  promoCode: string;
+  usedCount: number;
+  perUserLimit: number;
+  cuponCode: string;
+  isPublic?: boolean;
   isActive: boolean;
 }
 
@@ -27,9 +30,12 @@ const DiscountSchema: Schema = new Schema(
     value: { type: Number, required: true },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    minPurchase: { type: Number, required: false },
-    usageLimit: { type: Number, required: false },
-    promoCode: { type: String, required: false },
+    minPurchase: { type: Number },
+    usageLimit: { type: Number, default: 0 },
+    cuponCode: { type: String, default: "" },
+    usedCount: { type: Number, default: 0 },
+    perUserLimit: { type: Number, default: 0 },
+    isPublic: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
   },
   {
